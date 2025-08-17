@@ -12,9 +12,10 @@ f:SetFrameStrata( "TOOLTIP" )
 f.back = f:CreateTexture(nil,"BACKGROUND",nil,-1)
 f.back:SetAllPoints(f)
 f.back:SetTexture(255/255,100,100)
+
 f:RegisterEvent("UNIT_SPELLCAST_SENT")
-f:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-f:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+f:RegisterEvent("UNIT_SPELLCAST_START")
+f:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
 
 DEFAULT_CHAT_FRAME:AddMessage("WoWHACv4: Waiting for a response from WeakAuras")
 local function HookWA()
@@ -68,29 +69,49 @@ else
         end
     end)
 end
-local locked = false;
+
+local function IsGCDActive()
+    local spellCooldownInfo = C_Spell.GetSpellCooldown(61304)
+    if spellCooldownInfo.startTime == 0 then return false end
+    return (spellCooldownInfo.startTime + spellCooldownInfo.duration - GetTime()) > 0
+end
+
 local red = 0
 local green = 0
 local blue = 0
+
+local updateInterval = 0.1
+local timeSinceLastUpdate = 0
+
+f:SetScript("OnUpdate", function(self, elapsed)
+      timeSinceLastUpdate = timeSinceLastUpdate + elapsed
+      if timeSinceLastUpdate >= updateInterval then
+        timeSinceLastUpdate = 0
+         
+        local casting = UnitCastingInfo("player") ~= nil
+        local channeling = UnitChannelInfo("player") ~= nil
+        local gcdActive = IsGCDActive()
+         
+        if casting or channeling or gcdActive then
+		   f.back:SetColorTexture(0, 0, 0)
+           return
+        end
+		 
+		f.back:SetColorTexture(red, green, blue)
+      end
+end)
+
+
+f:SetScript("OnEvent", function(_, event, unit, _, spellID)
+	if unit ~= "player" then return end
+	f.back:SetColorTexture(0, 0, 0)
+end)
 
 function Process(keyBind, spell)
     keyBind = normalizeModifiers(keyBind)
     red = getRed(keyBind)
     green = getGreen(keyBind)
     blue = getBlue(keyBind)
-	f:SetScript("OnEvent", function(_, event, unit, _, spellID)
-		if unit ~= "player" then return end
-		if event == "UNIT_SPELLCAST_SENT" then
-			locked = true;
-			f.back:SetColorTexture(0, 0, 0)
-		else
-		    locked = false;
-			f.back:SetColorTexture(red, green, blue)
-		end
-	end)
-	if not locked then
-		f.back:SetColorTexture(red, green, blue)
-	end
 end
 
 function normalizeModifiers(keyBind)
