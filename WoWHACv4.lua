@@ -21,22 +21,39 @@ DEFAULT_CHAT_FRAME:AddMessage("WoWHACv4: Waiting for a response from WeakAuras")
 local function HookWA()
     if not WeakAuras or not WeakAuras.ScanEvents then return end
 	DEFAULT_CHAT_FRAME:AddMessage("WoWHACv4: WeakAuras detected, waiting for the supplier")
-	if IsAddOnLoaded("Hekili") then
+	if IsAddOnLoaded("Hekili") then	
 		DEFAULT_CHAT_FRAME:AddMessage("WoWHACv4: Selected supplier - Hekili")
-		hooksecurefunc(WeakAuras, "ScanEvents", function(event, _, arg2, _, _, arg5)
+		hooksecurefunc(WeakAuras, "ScanEvents", function(event, _, _, _, _, arg5)
 			if event == "HEKILI_RECOMMENDATION_UPDATE" then
 				if arg5 then
 					if arg5[1] then
 						if arg5[1].keybind then
-								Process(arg5[1].keybind, arg2)
+								Process(arg5[1].keybind)
 						end
 					end
 				end
 			end
 		end)
+	elseif IsAddOnLoaded("HeroRotation") then
+		DEFAULT_CHAT_FRAME:AddMessage("WoWHACv4: Selected supplier - HeroRotation")
+		if false then 
+			local Keybind = HeroRotation.MainIconFrame.Keybind
+			local last = Keybind:GetText()
+			hooksecurefunc(Keybind, "SetText", function(self, txt)
+				local burst = HeroRotation.LeftIconFrame.Keybind:GetText()
+				print(HeroRotation.MainIconFrame.CooldownFrame.Keybind:GetText())
+				if burst ~= nil then 
+				   txt = burst
+				end
+				if txt ~= last then
+					last = txt
+					Process(txt)
+				end
+			end)
+		end
 	elseif IsAddOnLoaded("MaxDps") then
 		DEFAULT_CHAT_FRAME:AddMessage("WoWHACv4: Selected supplier - MaxDps")
-		hooksecurefunc(WeakAuras, "ScanEvents", function(event, _, arg2, _, _, arg5)
+		hooksecurefunc(WeakAuras, "ScanEvents", function(event)
 			if event == "MAXDPS_SPELL_UPDATE" then
 				local currentSpell = MaxDps.Spell
 				if currentSpell then
@@ -47,7 +64,7 @@ local function HookWA()
 							if hotkey then
 								Process(string.upper(hotkey:GetText()):gsub("S%-", "S")
 									:gsub("C%-", "C")
-									:gsub("A%-", "A"), currentSpell)
+									:gsub("A%-", "A"))
 							end
 						end
 					end
@@ -107,7 +124,7 @@ f:SetScript("OnEvent", function(_, event, unit, _, spellID)
 	f.back:SetColorTexture(0, 0, 0)
 end)
 
-function Process(keyBind, spell)
+function Process(keyBind)
     keyBind = normalizeModifiers(keyBind)
     red = getRed(keyBind)
     green = getGreen(keyBind)
