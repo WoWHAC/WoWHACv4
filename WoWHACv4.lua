@@ -34,23 +34,35 @@ local function HookWA()
 				end
 			end
 		end)
-	elseif IsAddOnLoaded("HeroRotation") then
-		DEFAULT_CHAT_FRAME:AddMessage("WoWHACv4: Selected supplier - HeroRotation")
-		if false then 
-			local Keybind = HeroRotation.MainIconFrame.Keybind
+	elseif IsAddOnLoaded("ConRO") then
+		DEFAULT_CHAT_FRAME:AddMessage("WoWHACv4: Selected supplier - ConRO")
+        if ConROWindow and ConROWindow.fontkey then
+			local Keybind = ConROWindow.fontkey
 			local last = Keybind:GetText()
 			hooksecurefunc(Keybind, "SetText", function(self, txt)
-				local burst = HeroRotation.LeftIconFrame.Keybind:GetText()
-				print(HeroRotation.MainIconFrame.CooldownFrame.Keybind:GetText())
-				if burst ~= nil then 
-				   txt = burst
-				end
 				if txt ~= last then
 					last = txt
 					Process(txt)
 				end
 			end)
-		end
+        end
+	elseif IsAddOnLoaded("HeroRotation") then
+		DEFAULT_CHAT_FRAME:AddMessage("WoWHACv4: Selected supplier - HeroRotation")
+		local Keybind = HeroRotation.MainIconFrame.Keybind
+		local last = Keybind:GetText()
+		hooksecurefunc(Keybind, "SetText", function(self, txt)
+			local burst = HeroRotation.SmallIconFrame.Icon[1].Keybind
+			if burst and burst:IsVisible() then
+				local burstHotkey = burst:GetText()
+				if burstHotkey and burstHotkey ~= "" then
+					txt = burstHotkey
+				end
+			end
+			if txt ~= last then
+				last = txt
+				Process(txt)
+			end
+		end)
 	elseif IsAddOnLoaded("MaxDps") then
 		DEFAULT_CHAT_FRAME:AddMessage("WoWHACv4: Selected supplier - MaxDps")
 		hooksecurefunc(WeakAuras, "ScanEvents", function(event)
