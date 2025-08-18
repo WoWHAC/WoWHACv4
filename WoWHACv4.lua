@@ -65,8 +65,26 @@ local function HookWA()
 		end)
 	elseif IsAddOnLoaded("MaxDps") then
 		DEFAULT_CHAT_FRAME:AddMessage("WoWHACv4: Selected supplier - MaxDps")
-		hooksecurefunc(WeakAuras, "ScanEvents", function(event)
-			if event == "MAXDPS_SPELL_UPDATE" then
+		hooksecurefunc(WeakAuras, "ScanEvents", function(event, flags)
+			if event == "MAXDPS_COOLDOWN_UPDATE" then
+				for spellId, v in pairs(flags) do
+					if v then
+						for _, button in pairs(MaxDps.Spells[spellId]) do
+							local overlay = button.MaxDpsOverlays[spellId]
+							if overlay and overlay:IsVisible() then
+								local key = button.HotKey:GetText()
+								local nKey = string.upper(key):gsub("S%-", "S")
+										:gsub("C%-", "C")
+										:gsub("A%-", "A")
+								local green = getGreen(normalizeModifiers(nKey))
+								if green ~= 0 then
+									Process(nKey)
+									return
+								end
+							end
+						end
+					end
+				end
 				local currentSpell = MaxDps.Spell
 				if currentSpell then
 					local buttons = MaxDps.Spells and MaxDps.Spells[currentSpell]
