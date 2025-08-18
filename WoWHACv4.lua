@@ -1,5 +1,7 @@
 WoWHACv4 = LibStub("AceAddon-3.0"):NewAddon("WoWHACv4", "AceConsole-3.0", "AceEvent-3.0")
 
+local legacy = false;
+
 -- ===== 3.3.5a compatibility shims =====
 -- Создаём заглушки, если модулей нет.
 if type(C_AddOns) ~= "table" then C_AddOns = {} end
@@ -7,6 +9,7 @@ if type(C_Spell)  ~= "table" then C_Spell  = {} end
 
 -- C_AddOns.IsAddOnLoaded → fallback на старые API
 if type(C_AddOns.IsAddOnLoaded) ~= "function" then
+  legacy = true;
   function C_AddOns.IsAddOnLoaded(name)
     -- Если есть глобальная IsAddOnLoaded, используем её.
     if type(_G.IsAddOnLoaded) == "function" then
@@ -52,8 +55,20 @@ local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
 
 local f = CreateFrame("Frame","TestBorder",UIParent)
 f:SetSize(2,2)
-f:SetPoint("TOPLEFT")
+if legacy then
+	f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -1, 1)
+else
+	f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 0, 0)
+end
 f:SetFrameStrata( "TOOLTIP" )
+
+f.back = f:CreateTexture(nil,"BACKGROUND",nil,-1)
+f.back:SetAllPoints(f)
+SetTexColor(f.back, 255/255,100,100)
+
+f:RegisterEvent("UNIT_SPELLCAST_SENT")
+f:RegisterEvent("UNIT_SPELLCAST_START")
+f:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
 
 WoWHACv4.db = LibStub('AceDB-3.0'):New("MaxDpsCooldownsDB", {
     profile = {
@@ -109,15 +124,6 @@ function WoWHACv4:UpdateTextColor()
   if not fs then return end
   if WoWHACv4.db.profile.cds then fs:SetTextColor(0,1,0) else fs:SetTextColor(1,0,0) end
 end
-
-
-f.back = f:CreateTexture(nil,"BACKGROUND",nil,-1)
-f.back:SetAllPoints(f)
-SetTexColor(f.back, 1, 100/255, 100/255)
-
-f:RegisterEvent("UNIT_SPELLCAST_SENT")
-f:RegisterEvent("UNIT_SPELLCAST_START")
-f:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
 
 DEFAULT_CHAT_FRAME:AddMessage("WoWHACv4: Waiting for a response from WeakAuras")
 local function HookWA()
@@ -193,6 +199,7 @@ local function HookWA()
 		end)
 	elseif IsAddOnLoaded("Ovale") then
 		DEFAULT_CHAT_FRAME:AddMessage("WoWHACv4: Selected supplier - Ovale")	
+			-- Исправляем баги Ovale
 			function Ovale:ChercherShortcut(slot)
 				--[[
 					ACTIONBUTTON1..12			=> primary (1..12, 13..24), bonus (73..120)
@@ -241,27 +248,62 @@ local function HookWA()
 		WoWHACv4:ApplyPosition()
 		WoWHACv4:UpdateTextColor()
 		
+		local function GetSpellIdByName(name)
+			if name == nil then return nil end
+			return Ovale:GetSpellIdByName(name)
+		end
+		
+		local cache = {}
+		local _GetItemSpell  = GetItemSpell
+		function GetItemSpell(id, ...) 
+			local r = _GetItemSpell(id, ...)
+			if r then
+				cache[r] = id
+			end
+			return r
+		end
+		
+		local function GetItemIdByName(name)
+			if name == nil then return nil end
+			local itemId = cache[name]
+			if itemId == nil then return nil end
+			return itemId
+		end
+		
+		local function NormalizeSuggestion(spell)
+			if spell then
+				local spellName = spell.spellName
+				local spellId = GetSpellIdByName(spellName)
+				if spellId then
+					local s = C_Spell.GetSpellCooldown(spellId)
+					if s.startTime <= 0 or (s.startTime + s.duration - GetTime()) <= 0 then
+						return spell.icons[1].shortcut:GetText()
+					end
+				else
+					local itemId = GetItemIdByName(spellName)
+					if itemId then
+						local start, duration, enable = GetItemCooldown(itemId)
+						if start <= 0 or (start + duration - GetTime()) <= 0 then
+							return spell.icons[1].shortcut:GetText()
+						end
+					end
+				end
+			end
+		end
 		hooksecurefunc(Ovale, 'FirstInit', function()
 			hooksecurefunc(Ovale.frame, 'OnUpdate', function(frame)
 				local spell = nil
-				if WoWHACv4.db.profile.cds then
-					local cooldownSpell = frame.actions[2]
-					if cooldownSpell then
-						if not WoWHACv4:IsCooldownActive(Ovale:GetSpellIdByName(cooldownSpell.spellName)) then
-							spell = cooldownSpell.icons[1].shortcut:GetText()
-						end
-					end
+				spell = NormalizeSuggestion(frame.actions[4])
+				if spell == nil then
+					spell = NormalizeSuggestion(frame.actions[3])
+				end
+				if spell == nil and WoWHACv4.db.profile.cds then
+					spell = NormalizeSuggestion(frame.actions[2])
 				end
 				if spell == nil then
-					local mainSpell = frame.actions[1]
-					if mainSpell then
-						if not WoWHACv4:IsCooldownActive(Ovale:GetSpellIdByName(mainSpell.spellName)) then
-							spell = mainSpell.icons[1].shortcut:GetText()
-						end
-					end
+					spell = NormalizeSuggestion(frame.actions[1])
 				end
 				Process(spell)
-				print(spell)
 			end)
 		end)
 	end
@@ -281,21 +323,7 @@ else
 end
 
 local function IsGCDActive()
-	return WoWHACv4:IsCooldownActive(61304)
-end
-
-function WoWHACv4:IsCooldownActive(spellId)
-	if spellId == nil then
-		return false
-	end
-    local spellCooldownInfo = {}
-	spellCooldownInfo.startTime = 0
-	local ok, result = pcall(C_Spell.GetSpellCooldown, spellId)
-	if ok then
-		spellCooldownInfo = result
-	else
-		spellCooldownInfo = GetItemCooldown(spellId)
-	end
+    local spellCooldownInfo = C_Spell.GetSpellCooldown(61304)
     if spellCooldownInfo.startTime == 0 then return false end
     return (spellCooldownInfo.startTime + spellCooldownInfo.duration - GetTime()) > 0
 end
