@@ -1,5 +1,52 @@
 WoWHACv4 = LibStub("AceAddon-3.0"):NewAddon("WoWHACv4", "AceConsole-3.0", "AceEvent-3.0")
 
+-- ===== 3.3.5a compatibility shims =====
+-- Создаём заглушки, если модулей нет.
+if type(C_AddOns) ~= "table" then C_AddOns = {} end
+if type(C_Spell)  ~= "table" then C_Spell  = {} end
+
+-- C_AddOns.IsAddOnLoaded → fallback на старые API
+if type(C_AddOns.IsAddOnLoaded) ~= "function" then
+  function C_AddOns.IsAddOnLoaded(name)
+    -- Если есть глобальная IsAddOnLoaded, используем её.
+    if type(_G.IsAddOnLoaded) == "function" then
+      local ok, loaded = pcall(_G.IsAddOnLoaded, name)
+      if ok and loaded ~= nil then return loaded end
+    end
+    -- Иначе считаем «загруженным», если аддон включён (лучший доступный сигнал на 3.3.5a).
+    if type(GetNumAddOns) == "function" and type(GetAddOnInfo) == "function" then
+      for i = 1, GetNumAddOns() do
+        local addonName, _, _, enabled = GetAddOnInfo(i)
+        if addonName == name then return not not enabled end
+      end
+    end
+    return false
+  end
+end
+
+-- C_Spell.GetSpellCooldown → упаковываем старый GetSpellCooldown в «современный» ответ
+if type(C_Spell.GetSpellCooldown) ~= "function" then
+  function C_Spell.GetSpellCooldown(spellId)
+    local start, duration, enabled = GetSpellCooldown(spellId)
+    return {
+      startTime = start or 0,
+      duration  = duration or 0,
+      isEnabled = (enabled == 1 or enabled == true)
+    }
+  end
+end
+
+-- Универсальная установка цвета текстуры (в 3.3.5a нет SetColorTexture)
+local function SetTexColor(tex, r, g, b, a)
+  if tex.SetColorTexture then
+    tex:SetColorTexture(r, g, b, a)
+  else
+    tex:SetTexture(r, g, b, a)
+  end
+end
+
+-- ===== /3.3.5a shims =====
+
 local weakAurasStatus = false
 local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
 
@@ -37,7 +84,7 @@ function WoWHACv4:CreateButton()
   btn:SetScript("OnDragStop", function(b)
     b:StopMovingOrSizing()
     local p, rel, rp, x, y = b:GetPoint()
-    WoWHACv4.db.profile.point = {p, rel and rel:GetName() or "UIParent", rp, x, y}
+    WoWHACv4.db.profile.points = {p, rel and rel:GetName() or "UIParent", rp, x, y}
   end)
 
   -- Переключаем ТОЛЬКО цвет текста
@@ -66,7 +113,7 @@ end
 
 f.back = f:CreateTexture(nil,"BACKGROUND",nil,-1)
 f.back:SetAllPoints(f)
-f.back:SetTexture(255/255,100,100)
+SetTexColor(f.back, 1, 100/255, 100/255)
 
 f:RegisterEvent("UNIT_SPELLCAST_SENT")
 f:RegisterEvent("UNIT_SPELLCAST_START")
@@ -130,7 +177,6 @@ local function HookWA()
 				if true then
 					for _, frame in pairs(MaxDps.Frames) do
 						if frame and frame:IsVisible() then
-							print(frame.ovType)
 							if WoWHACv4.db.profile.cds or frame.ovType ~= "cooldown" then
 								local button = frame:GetParent()
 								local keybind = string.upper(button.HotKey:GetText()):gsub("S%-", "S")
@@ -144,6 +190,79 @@ local function HookWA()
 					return
 				end
 			end
+		end)
+	elseif IsAddOnLoaded("Ovale") then
+		DEFAULT_CHAT_FRAME:AddMessage("WoWHACv4: Selected supplier - Ovale")	
+			function Ovale:ChercherShortcut(slot)
+				--[[
+					ACTIONBUTTON1..12			=> primary (1..12, 13..24), bonus (73..120)
+					MULTIACTIONBAR1BUTTON1..12	=> bottom left (61..72)
+					MULTIACTIONBAR2BUTTON1..12	=> bottom right (49..60)
+					MULTIACTIONBAR3BUTTON1..12	=> top right (25..36)
+					MULTIACTIONBAR4BUTTON1..12	=> top left (37..48)
+				--]]
+				local name
+				if slot > 12 and Bartender4 then
+					name = "CLICK BT4Button" .. slot .. ":LeftButton"
+				else
+					if slot <= 24 or slot > 72 then
+						name = "ACTIONBUTTON" .. (((slot - 1)%12) + 1)
+					elseif slot <= 36 then
+						name = "MULTIACTIONBAR3BUTTON" .. (slot - 24)
+					elseif slot <= 48 then
+						name = "MULTIACTIONBAR4BUTTON" .. (slot - 36)
+					elseif slot <= 60 then
+						name = "MULTIACTIONBAR2BUTTON" .. (slot - 48)
+					else
+						name = "MULTIACTIONBAR1BUTTON" .. (slot - 60)
+					end
+				end
+				local key = name and GetBindingKey(name)
+				-- Shorten the keybinding names.
+				if key and string.len(key) > 4 then
+					key = string.upper(key)
+					-- Strip whitespace.
+					key = string.gsub(key, "%s+", "")
+					-- Convert modifiers to a single character.
+					key = string.gsub(key, "ALT%-", "A")
+					key = string.gsub(key, "CTRL%-", "C")
+					key = string.gsub(key, "SHIFT%-", "S")
+					-- Shorten numberpad keybinding names.
+					key = string.gsub(key, "NUMPAD", "N")
+					key = string.gsub(key, "PLUS", "+")
+					key = string.gsub(key, "MINUS", "-")
+					key = string.gsub(key, "MULTIPLY", "*")
+					key = string.gsub(key, "DIVIDE", "/")
+				end
+				return key
+			end	
+			
+		WoWHACv4:CreateButton()
+		WoWHACv4:ApplyPosition()
+		WoWHACv4:UpdateTextColor()
+		
+		hooksecurefunc(Ovale, 'FirstInit', function()
+			hooksecurefunc(Ovale.frame, 'OnUpdate', function(frame)
+				local spell = nil
+				if WoWHACv4.db.profile.cds then
+					local cooldownSpell = frame.actions[2]
+					if cooldownSpell then
+						if not WoWHACv4:IsCooldownActive(Ovale:GetSpellIdByName(cooldownSpell.spellName)) then
+							spell = cooldownSpell.icons[1].shortcut:GetText()
+						end
+					end
+				end
+				if spell == nil then
+					local mainSpell = frame.actions[1]
+					if mainSpell then
+						if not WoWHACv4:IsCooldownActive(Ovale:GetSpellIdByName(mainSpell.spellName)) then
+							spell = mainSpell.icons[1].shortcut:GetText()
+						end
+					end
+				end
+				Process(spell)
+				print(spell)
+			end)
 		end)
 	end
 end
@@ -162,7 +281,21 @@ else
 end
 
 local function IsGCDActive()
-    local spellCooldownInfo = C_Spell.GetSpellCooldown(61304)
+	return WoWHACv4:IsCooldownActive(61304)
+end
+
+function WoWHACv4:IsCooldownActive(spellId)
+	if spellId == nil then
+		return false
+	end
+    local spellCooldownInfo = {}
+	spellCooldownInfo.startTime = 0
+	local ok, result = pcall(C_Spell.GetSpellCooldown, spellId)
+	if ok then
+		spellCooldownInfo = result
+	else
+		spellCooldownInfo = GetItemCooldown(spellId)
+	end
     if spellCooldownInfo.startTime == 0 then return false end
     return (spellCooldownInfo.startTime + spellCooldownInfo.duration - GetTime()) > 0
 end
@@ -184,18 +317,18 @@ f:SetScript("OnUpdate", function(self, elapsed)
         local gcdActive = IsGCDActive()
          
         if casting or channeling or gcdActive then
-		   f.back:SetColorTexture(0, 0, 0)
+		   SetTexColor(f.back, 0, 0, 0)
            return
         end
 		 
-		f.back:SetColorTexture(red, green, blue)
+		SetTexColor(f.back, red, green, blue)
       end
 end)
 
 
 f:SetScript("OnEvent", function(_, event, unit, _, spellID)
 	if unit ~= "player" then return end
-	f.back:SetColorTexture(0, 0, 0)
+	SetTexColor(f.back, 0, 0, 0)
 end)
 
 function Process(keyBind)
