@@ -1,4 +1,4 @@
-HekiliAutoCast = LibStub("AceAddon-3.0"):NewAddon("WoWHACv4", "AceConsole-3.0", "AceEvent-3.0")
+WoWHACv4 = LibStub("AceAddon-3.0"):NewAddon("WoWHACv4", "AceConsole-3.0", "AceEvent-3.0")
 
 local weakAurasStatus = false
 local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
@@ -7,6 +7,61 @@ local f = CreateFrame("Frame","TestBorder",UIParent)
 f:SetSize(2,2)
 f:SetPoint("TOPLEFT")
 f:SetFrameStrata( "TOOLTIP" )
+
+WoWHACv4.db = LibStub('AceDB-3.0'):New("MaxDpsCooldownsDB", {
+    profile = {
+		points = {"CENTER","UIParent","CENTER",100,100},
+		cds = false,
+		size  = {40, 20},
+		text  = "CDs",
+	}
+})
+
+function WoWHACv4:CreateButton()
+  if WoWHACv4.btn then return end
+
+  local parent = (PARENT_NAME and _G[PARENT_NAME]) or UIParent
+  local w, h   = WoWHACv4.db.profile.size[1], WoWHACv4.db.profile.size[2]
+
+  local btn = CreateFrame("Button", "MaxDpsCooldowns_Button", parent, "UIPanelButtonTemplate")
+  btn:SetSize(w, h)
+  btn:SetPoint("CENTER")
+  btn:SetText(WoWHACv4.db.profile.text)
+  btn:SetClampedToScreen(true)
+
+  -- Перетаскивание и сохранение позиции
+  btn:SetMovable(true)
+  btn:EnableMouse(true)
+  btn:RegisterForDrag("LeftButton")
+  btn:SetScript("OnDragStart", btn.StartMoving)
+  btn:SetScript("OnDragStop", function(b)
+    b:StopMovingOrSizing()
+    local p, rel, rp, x, y = b:GetPoint()
+    WoWHACv4.db.profile.point = {p, rel and rel:GetName() or "UIParent", rp, x, y}
+  end)
+
+  -- Переключаем ТОЛЬКО цвет текста
+  local fs = btn.Text or btn:GetFontString()
+  btn:SetScript("OnClick", function()
+    WoWHACv4.db.profile.cds = not WoWHACv4.db.profile.cds
+    WoWHACv4:UpdateTextColor()
+  end)
+
+  WoWHACv4.btn, WoWHACv4.fs = btn, fs
+end
+
+function WoWHACv4:ApplyPosition()
+  local p = WoWHACv4.db.profile.points
+  local rel = _G[p[2]] or UIParent
+  WoWHACv4.btn:ClearAllPoints()
+  WoWHACv4.btn:SetPoint(p[1], rel, p[3], p[4], p[5])
+end
+
+function WoWHACv4:UpdateTextColor()
+  local fs = WoWHACv4.fs or (WoWHACv4.btn and (WoWHACv4.btn.Text or WoWHACv4.btn:GetFontString()))
+  if not fs then return end
+  if WoWHACv4.db.profile.cds then fs:SetTextColor(0,1,0) else fs:SetTextColor(1,0,0) end
+end
 
 
 f.back = f:CreateTexture(nil,"BACKGROUND",nil,-1)
@@ -65,39 +120,28 @@ local function HookWA()
 		end)
 	elseif IsAddOnLoaded("MaxDps") then
 		DEFAULT_CHAT_FRAME:AddMessage("WoWHACv4: Selected supplier - MaxDps")
+		
+		WoWHACv4:CreateButton()
+		WoWHACv4:ApplyPosition()
+		WoWHACv4:UpdateTextColor()
+		
 		hooksecurefunc(WeakAuras, "ScanEvents", function(event, flags)
 			if event == "MAXDPS_COOLDOWN_UPDATE" then
-				for spellId, v in pairs(flags) do
-					if v then
-						for _, button in pairs(MaxDps.Spells[spellId]) do
-							local overlay = button.MaxDpsOverlays[spellId]
-							if overlay and overlay:IsVisible() then
-								local key = button.HotKey:GetText()
-								local nKey = string.upper(key):gsub("S%-", "S")
-										:gsub("C%-", "C")
-										:gsub("A%-", "A")
-								local green = getGreen(normalizeModifiers(nKey))
-								if green ~= 0 then
-									Process(nKey)
-									return
-								end
+				if true then
+					for _, frame in pairs(MaxDps.Frames) do
+						if frame and frame:IsVisible() then
+							print(frame.ovType)
+							if WoWHACv4.db.profile.cds or frame.ovType ~= "cooldown" then
+								local button = frame:GetParent()
+								local keybind = string.upper(button.HotKey:GetText()):gsub("S%-", "S")
+											:gsub("C%-", "C")
+											:gsub("A%-", "A")
+								Process(keybind)
+								return
 							end
 						end
 					end
-				end
-				local currentSpell = MaxDps.Spell
-				if currentSpell then
-					local buttons = MaxDps.Spells and MaxDps.Spells[currentSpell]
-					if buttons then
-						if buttons[1] then 
-							local hotkey = buttons[1].HotKey
-							if hotkey then
-								Process(string.upper(hotkey:GetText()):gsub("S%-", "S")
-									:gsub("C%-", "C")
-									:gsub("A%-", "A"))
-							end
-						end
-					end
+					return
 				end
 			end
 		end)
