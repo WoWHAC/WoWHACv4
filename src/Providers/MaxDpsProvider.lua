@@ -2,6 +2,7 @@ local _, WoWHACv4 = ...
 
 local MaxDpsProvider = WoWHACv4.Provider:extend("MaxDpsProvider")
 
+local currentHotkey;
 function MaxDpsProvider:init()
     WoWHACv4:Log("Supplier found: MaxDps.")
     WoWHACv4:RegisterMessage("WOWHACV4_WA_PRESENTS", function(_, _, isLoaded)
@@ -14,7 +15,7 @@ function MaxDpsProvider:init()
                             if frame and frame:IsVisible() then
                                 if WoWHACv4.burst or frame.ovType ~= "cooldown" then
                                     local button = frame:GetParent()
-                                    self:Fire(button.HotKey:GetText())
+                                    currentHotkey = button.HotKey:GetText()
                                     return
                                 end
                             end
@@ -27,6 +28,13 @@ function MaxDpsProvider:init()
             WoWHACv4:Log("To use the MaxDps as rotation provider, you need to install WeakAuras.")
         end
     end)
+end
+function MaxDpsProvider:GetCurrentHotKey()
+    return currentHotkey
+end
+
+function MaxDpsProvider:GetCurrentId()
+    return 0
 end
 
 WoWHACv4.providers["MaxDps"] = MaxDpsProvider
