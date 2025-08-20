@@ -1,24 +1,5 @@
 local _, WoWHACv4 = ...
 
---local tuple = Tuple2()
---local tupleId = Tuple2()
-
---WoWHACv4:RegisterMessage("WOWHACV4_UPDATE_HOTKEY", function(_, keybind, spellId)
---    if keybind then
---        WoWHACv4:Debug("Presumed hot key: " .. keybind)
---    end
---    local steganography = WoWHACv4.Steganography(keybind)
---    tuple:SetFirst(steganography)
---    tupleId:SetFirst(spellId)
---end)
---
---WoWHACv4:RegisterMessage("WOWHACV4_NEXT_HOTKEY", function(_, keybind, spellId)
---    local steganography = WoWHACv4.Steganography(keybind)
---    tuple:SetSecond(steganography)
---    print(keybind, " ", spellId)
---    tupleId:SetSecond(spellId)
---end)
-
 local function GetItemCooldownDuration(itemId)
     local start, duration, enable = GetItemCooldown(itemId)
     if enable == 0 or start == 0 then
