@@ -73,7 +73,7 @@ function WoWHACv4:UpdatePixel()
             if nextId then
                 if not IsCooldownActive(nextId, 0) then
                     if C_Spell.IsSpellUsable then
-                        local usable = C_Spell.IsSpellUsable(spellID)
+                        local usable = C_Spell.IsSpellUsable(nextId)
                         if not usable then
                             lastCastId = nil
                         end
