@@ -1,23 +1,23 @@
 local _, WoWHACv4 = ...
 
-local tuple = Tuple2()
-local tupleId = Tuple2()
+--local tuple = Tuple2()
+--local tupleId = Tuple2()
 
-WoWHACv4:RegisterMessage("WOWHACV4_UPDATE_HOTKEY", function(_, keybind, spellId)
-    if keybind then
-        WoWHACv4:Debug("Presumed hot key: " .. keybind)
-    end
-    local steganography = WoWHACv4.Steganography(keybind)
-    tuple:SetFirst(steganography)
-    tupleId:SetFirst(spellId)
-end)
-
-WoWHACv4:RegisterMessage("WOWHACV4_NEXT_HOTKEY", function(_, keybind, spellId)
-    local steganography = WoWHACv4.Steganography(keybind)
-    tuple:SetSecond(steganography)
-    print(keybind, " ", spellId)
-    tupleId:SetSecond(spellId)
-end)
+--WoWHACv4:RegisterMessage("WOWHACV4_UPDATE_HOTKEY", function(_, keybind, spellId)
+--    if keybind then
+--        WoWHACv4:Debug("Presumed hot key: " .. keybind)
+--    end
+--    local steganography = WoWHACv4.Steganography(keybind)
+--    tuple:SetFirst(steganography)
+--    tupleId:SetFirst(spellId)
+--end)
+--
+--WoWHACv4:RegisterMessage("WOWHACV4_NEXT_HOTKEY", function(_, keybind, spellId)
+--    local steganography = WoWHACv4.Steganography(keybind)
+--    tuple:SetSecond(steganography)
+--    print(keybind, " ", spellId)
+--    tupleId:SetSecond(spellId)
+--end)
 
 local function GetItemCooldownDuration(itemId)
     local start, duration, enable = GetItemCooldown(itemId)
@@ -64,14 +64,12 @@ function SpellCastEventHandler:OnEnable()
     WoWHACv4:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START", "OnSpellcast")
 end
 local lastCastId
-local lastCast
 function WoWHACv4:OnSpellcast(event, unit, _, _, spellId)
     if unit == "player" then
         WoWHACv4.pixel:SetColor(0, 0, 0)
     end
     if event == "UNIT_SPELLCAST_SENT" then
         lastCastId = spellId
-        lastCast = tuple:GetFirst()
     end
 end
 
@@ -79,21 +77,29 @@ function WoWHACv4:UpdatePixel()
     local casting = UnitCastingInfo("player") ~= nil
     if casting or IsChanneling(300) or IsGCDActive(300) then
         WoWHACv4.pixel:SetColor(0, 0, 0)
-        if lastCastId == tupleId:GetFirst() then
-            local second = tuple:GetSecond()
-            if second then
-                tuple:SetFirst(second)
-                tupleId:SetFirst(tupleId:GetSecond())
+    else
+        if WoWHACv4.CURRENT_PROVIDER == nil then
+            return
+        end
+        local curr = WoWHACv4.CURRENT_PROVIDER:GetCurrentId()
+        if curr == nil then
+            return
+        end
+        if lastCastId == curr then
+            local nextId = WoWHACv4.CURRENT_PROVIDER:GetNextId()
+            if nextId then
+                if not IsCooldownActive(nextId, 0) then
+                    local rgb = WoWHACv4.Steganography(WoWHACv4.CURRENT_PROVIDER:GetNextHotKey())
+                    if rgb.green > 0 then
+                        WoWHACv4.pixel:SetColor(rgb.red, rgb.green, rgb.blue)
+                        return
+                    end
+                end
             end
         end
-    else
-        local rgb = tuple:GetFirst()
-        if rgb == nil or rgb.green == 0 then
-            tuple:SetFirst(WoWHACv4.Steganography(WoWHACv4.CURRENT_PROVIDER:GetCurrent()))
-        else
-            WoWHACv4.pixel:SetColor(rgb.red, rgb.green, rgb.blue)
-        end
+        local rgb = WoWHACv4.Steganography(WoWHACv4.CURRENT_PROVIDER:GetCurrentHotKey())
+        WoWHACv4.pixel:SetColor(rgb.red, rgb.green, rgb.blue)
     end
 end
 
-WoWHACv4:ScheduleRepeatingTimer("UpdatePixel", 0.06)
+WoWHACv4:ScheduleRepeatingTimer("UpdatePixel", 0.1)
