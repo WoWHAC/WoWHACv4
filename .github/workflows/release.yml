@@ -13,6 +13,13 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+      - name: Set up tag
+        id: tag
+        run: |
+          TAG="v$(date +'%Y.%m.%d-%H%M%S')"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          git tag "$TAG"
+          git push origin "$TAG"
       - name: Install zip/unzip
         run: sudo apt-get install -y zip unzip
       - name: Prepare archives
@@ -30,6 +37,7 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ steps.tag.outputs.tag }}
           files: out/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
