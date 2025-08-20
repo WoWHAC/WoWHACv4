@@ -45,12 +45,14 @@ function SpellCastEventHandler:OnEnable()
     WoWHACv4:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START", "OnSpellcast")
 end
 local lastCastId
+local stackCounter = 0
 function WoWHACv4:OnSpellcast(event, unit, _, _, spellId)
     if unit == "player" then
         WoWHACv4.pixel:SetColor(0, 0, 0)
     end
     if event == "UNIT_SPELLCAST_SENT" then
         lastCastId = spellId
+        stackCounter = 0
     end
 end
 
@@ -70,6 +72,16 @@ function WoWHACv4:UpdatePixel()
             local nextId = WoWHACv4.CURRENT_PROVIDER:GetNextId()
             if nextId then
                 if not IsCooldownActive(nextId, 0) then
+                    if C_Spell.IsSpellUsable then
+                        local usable = C_Spell.IsSpellUsable(spellID)
+                        if not usable then
+                            lastCastId = nil
+                        end
+                    end
+                    stackCounter = stackCounter + 1
+                    if stackCounter > 5 then
+                        lastCastId = nil
+                    end
                     local rgb = WoWHACv4.Steganography(WoWHACv4.CURRENT_PROVIDER:GetNextHotKey())
                     if rgb.green > 0 then
                         WoWHACv4.pixel:SetColor(rgb.red, rgb.green, rgb.blue)
