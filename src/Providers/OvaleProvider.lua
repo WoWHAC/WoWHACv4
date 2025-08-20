@@ -2,6 +2,8 @@ local _, WoWHACv4 = ...
 
 local OvaleProvider = WoWHACv4.Provider:extend("OvaleProvider")
 
+local currentHotkey;
+
 function OvaleProvider:init()
     WoWHACv4:Log("Supplier found: Ovale.")
     local KEY_REPLACEMENTS = {
@@ -100,8 +102,15 @@ function OvaleProvider:init()
             end
         end
 
-        self:Fire(spell)
+        currentHotkey = spell
     end)
+end
+function OvaleProvider:GetCurrentHotKey()
+    return currentHotkey
+end
+
+function OvaleProvider:GetCurrentId()
+    return 0
 end
 
 WoWHACv4.providers["Ovale"] = OvaleProvider
