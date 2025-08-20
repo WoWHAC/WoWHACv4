@@ -35,11 +35,10 @@ jobs:
             (cd "$workdir" && zip -qr "$OUTDIR/$name" .)
             rm -rf "$workdir"
           done
-
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.tag.outputs.tag }}
-          files: out/*.zip
+          files: ${{ env.OUTDIR }}/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
