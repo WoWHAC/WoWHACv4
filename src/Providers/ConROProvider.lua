@@ -1,9 +1,11 @@
 local _, WoWHACv4 = ...
+
+local ConROProvider = WoWHACv4.Provider:extend("ConROProvider")
+
 local currentId;
 local currentHotkey;
 local nextId;
 local nextHotkey;
-local ConROProvider = WoWHACv4.Provider:extend("ConROProvider")
 function ConROProvider:init()
     WoWHACv4:Log("Supplier found: ConRO.")
     if ConROWindow and ConROWindow.fontkey then
