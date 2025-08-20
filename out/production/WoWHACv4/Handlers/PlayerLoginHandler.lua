@@ -10,12 +10,9 @@ end
 function PlayerLoginHandler:PLAYER_ENTERING_WORLD()
     for key, value in pairs(WoWHACv4.providers) do
         if C_AddOns.IsAddOnLoaded(key) then
-            WoWHACv4.CURRENT_PROVIDER = value()
+            value()
             break
         end
-    end
-    if WoWHACv4.CURRENT_PROVIDER == nil then
-        WoWHACv4.CURRENT_PROVIDER = Provider()
     end
     WoWHACv4:SendMessage("WOWHACV4_WA_PRESENTS", C_AddOns.IsAddOnLoaded("WeakAuras"))
 end

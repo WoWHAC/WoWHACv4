@@ -21,10 +21,8 @@ local previousR = 0
 local previousG = 0
 local previousB = 0
 function PixelFrame:SetColor(r, g, b)
-    local result = false
     if r ~= previousR or g ~= previousG or b ~= previousB then
         WoWHACv4:Debug("Change pixel color to R: " .. r .. " G: " .. g .. " B: " .. b)
-        result = true
     end
     previousR = r
     previousG = g
@@ -34,7 +32,6 @@ function PixelFrame:SetColor(r, g, b)
     else
         self.frame.back:SetColorTexture(r, g, b)
     end
-    return result
 end
 
 WoWHACv4.pixel = PixelFrame()

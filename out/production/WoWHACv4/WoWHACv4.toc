@@ -8,7 +8,7 @@
 embeds.xml
 Backports\CAddOns.lua
 Backports\CSpell.lua
-Utils\Tuple2.lua
+Utils\Queue2.lua
 Bootstrap.lua
 Frames\PixelFrame.lua
 # Handlers\SpellCastEventHandler.lua

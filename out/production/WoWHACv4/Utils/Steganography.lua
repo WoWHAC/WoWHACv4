@@ -78,7 +78,6 @@ end
 local Steganography = class("Steganography")
 function Steganography:init(keybind)
     keybind = WoWHACv4:NormalizeModifiers(keybind)
-    self.keybind = keybind
     self.red = _CalculateRed(keybind);
     self.green = _CalculateGreen(keybind)
     self.blue = self.red;
