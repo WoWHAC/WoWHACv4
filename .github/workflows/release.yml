@@ -30,7 +30,7 @@ jobs:
             name=$(basename "$f")
             workdir=$(mktemp -d)
             unzip -q "$f" -d "$workdir"
-            cp -r src "$workdir/WoWHACv4"
+            cp -r src/* "$workdir/WoWHACv4/"
             (cd "$workdir" && zip -qr "$OUTDIR/$name" .)
             rm -rf "$workdir"
           done
