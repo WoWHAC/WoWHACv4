@@ -14,7 +14,10 @@ local function GetCooldownDuration(spellId)
         return GetItemCooldownDuration(spellId)
     end
     local cd = C_Spell.GetSpellCooldown(spellId)
-    return ((cd.startTime + cd.duration) - GetTime()) * 1000
+    if cd then
+        return ((cd.startTime + cd.duration) - GetTime()) * 1000
+    end
+    return 0
 end
 local function IsCooldownActive(spellId, threshold)
     return GetCooldownDuration(spellId) > threshold
