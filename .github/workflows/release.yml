@@ -24,16 +24,18 @@ jobs:
         run: sudo apt-get install -y zip unzip
       - name: Prepare archives
         run: |
-          mkdir -p out
-          OUTDIR="$(pwd)/out"
+          OUTDIR="$(mktemp -d)"
+          echo "OUTDIR=$OUTDIR" >> $GITHUB_ENV
           for f in prebuilds/*.zip; do
             name=$(basename "$f")
             workdir=$(mktemp -d)
             unzip -q "$f" -d "$workdir"
+            mkdir -p "$workdir/WoWHACv4"
             cp -r src/* "$workdir/WoWHACv4/"
             (cd "$workdir" && zip -qr "$OUTDIR/$name" .)
             rm -rf "$workdir"
           done
+
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
