@@ -1,0 +1,34 @@
+name: Package Release
+
+concurrency: production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Install zip/unzip
+        run: sudo apt-get install -y zip unzip
+      - name: Prepare archives
+        run: |
+          mkdir out
+          for f in prebuilds/*.zip; do
+            name=$(basename "$f")
+            workdir=$(mktemp -d)
+            unzip -q "$f" -d "$workdir"
+            cp -r src "$workdir/WoWHACv4"
+            (cd "$workdir" && zip -qr "../out/$name" .)
+            rm -rf "$workdir"
+          done
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: out/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

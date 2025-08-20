@@ -1,0 +1,26 @@
+## Interface: 80205
+## Title: WoWHACv4
+## Notes: Auxiliary addon for third party software "WoWHACv4".
+## Author: CKATEPTb
+## Version: 2.0.0
+## OptionalDeps: WeakAuras, ConRO, Hekili, MaxDps, HeroRotation, Ovale
+
+embeds.xml
+Backports\CAddOns.lua
+Backports\CSpell.lua
+Bootstrap.lua
+Frames\PixelFrame.lua
+Handlers\SpellCastEventHandler.lua
+Utils\Keybinds.lua
+Utils\Steganography.lua
+Frames\ToggleBurstFrame.lua
+Providers\Provider.lua
+Providers\HekiliProvider.lua
+Providers\ConROProvider.lua
+Providers\HeroRotationProvider.lua
+Providers\MaxDpsProvider.lua
+Providers\OvaleProvider.lua
+Handlers\PlayerLoginHandler.lua
+Rotation.lua
+
+

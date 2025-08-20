@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Annotations" type="Lua">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/stubs/wow-api/Annotations" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
