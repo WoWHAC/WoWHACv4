@@ -17,13 +17,14 @@ jobs:
         run: sudo apt-get install -y zip unzip
       - name: Prepare archives
         run: |
-          mkdir out
+          mkdir -p out
+          OUTDIR="$(pwd)/out"
           for f in prebuilds/*.zip; do
             name=$(basename "$f")
             workdir=$(mktemp -d)
             unzip -q "$f" -d "$workdir"
             cp -r src "$workdir/WoWHACv4"
-            (cd "$workdir" && zip -qr "../out/$name" .)
+            (cd "$workdir" && zip -qr "$OUTDIR/$name" .)
             rm -rf "$workdir"
           done
       - name: Release
