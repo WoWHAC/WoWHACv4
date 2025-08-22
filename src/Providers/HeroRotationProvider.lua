@@ -1,13 +1,13 @@
-local _, WoWHACv4 = ...
+local _, WoWHACv5 = ...
 
-local HeroRotationProvider = WoWHACv4.Provider:extend("HeroRotationProvider")
+local HeroRotationProvider = WoWHACv5.Provider:extend("HeroRotationProvider")
 
 local currentHotkey;
 function HeroRotationProvider:init()
-    WoWHACv4:Log("Supplier found: HeroRotation.")
+    WoWHACv5:Log("Supplier found: HeroRotation.")
     local Keybind = HeroRotation.MainIconFrame.Keybind
     local last = Keybind:GetText()
-    WoWHACv4:SecureHook(Keybind, "SetText", function(_, txt)
+    WoWHACv5:SecureHook(Keybind, "SetText", function(_, txt)
         local rightSuggest = HeroRotation.RightSuggestedIconFrame.Keybind
         if rightSuggest and rightSuggest:IsVisible() then
             local suggestedHotkey = rightSuggest:GetText()
@@ -46,4 +46,4 @@ function HeroRotationProvider:GetCurrentId()
     return 0
 end
 
-WoWHACv4.providers["HeroRotation"] = HeroRotationProvider
+WoWHACv5.providers["HeroRotation"] = HeroRotationProvider

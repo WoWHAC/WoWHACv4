@@ -1,6 +1,6 @@
-local _, WoWHACv4 = ...
+local _, WoWHACv5 = ...
 
-function WoWHACv4:NormalizeModifiers(keyBind)
+function WoWHACv5:NormalizeModifiers(keyBind)
     if keyBind == nil then
         return nil
     end

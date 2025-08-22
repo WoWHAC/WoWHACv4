@@ -1,16 +1,16 @@
-local _, WoWHACv4 = ...
+local _, WoWHACv5 = ...
 
-local HekiliProvider = WoWHACv4.Provider:extend("HekiliProvider")
+local HekiliProvider = WoWHACv5.Provider:extend("HekiliProvider")
 
 local currentId;
 local currentHotkey;
 local nextId;
 local nextHotkey;
 function HekiliProvider:init()
-    WoWHACv4:Log("Supplier found: Hekili.")
-    WoWHACv4:RegisterMessage("WOWHACV4_WA_PRESENTS", function(_, _, isLoaded)
+    WoWHACv5:Log("Supplier found: Hekili.")
+    WoWHACv5:RegisterMessage("WOWHACV4_WA_PRESENTS", function(_, _, isLoaded)
         if isLoaded then
-            WoWHACv4:SecureHook(WeakAuras, "ScanEvents", function(event, display, spellId, _, _, arg5)
+            WoWHACv5:SecureHook(WeakAuras, "ScanEvents", function(event, display, spellId, _, _, arg5)
                 if event == "HEKILI_RECOMMENDATION_UPDATE" then
                     if arg5 then
                         local next = arg5[2]
@@ -33,7 +33,7 @@ function HekiliProvider:init()
                 end
             end)
         else
-            WoWHACv4:Log("To use the Hekili as rotation, you need to install WeakAuras.")
+            WoWHACv5:Log("To use the Hekili as rotation, you need to install WeakAuras.")
         end
     end)
 end
@@ -64,4 +64,4 @@ function HekiliProvider:GetNextId()
     return nextId
 end
 
-WoWHACv4.providers["Hekili"] = HekiliProvider
+WoWHACv5.providers["Hekili"] = HekiliProvider

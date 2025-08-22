@@ -1,4 +1,4 @@
-local _, WoWHACv4 = ...
+local _, WoWHACv5 = ...
 
 local function GetItemCooldownDuration(itemId)
     local start, duration, enable = GetItemCooldown(itemId)
@@ -39,42 +39,42 @@ local function IsChanneling(threshold)
     return false
 end
 
-local SpellCastEventHandler = WoWHACv4:NewModule("SpellCastEventHandler", "AceEvent-3.0")
+local SpellCastEventHandler = WoWHACv5:NewModule("SpellCastEventHandler", "AceEvent-3.0")
 
 function SpellCastEventHandler:OnEnable()
-    WoWHACv4:Debug("Register SpellCast handlers")
-    WoWHACv4:RegisterEvent("UNIT_SPELLCAST_SENT", "OnSpellcast")
-    WoWHACv4:RegisterEvent("UNIT_SPELLCAST_START", "OnSpellcast")
-    WoWHACv4:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START", "OnSpellcast")
+    WoWHACv5:Debug("Register SpellCast handlers")
+    WoWHACv5:RegisterEvent("UNIT_SPELLCAST_SENT", "OnSpellcast")
+    WoWHACv5:RegisterEvent("UNIT_SPELLCAST_START", "OnSpellcast")
+    WoWHACv5:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START", "OnSpellcast")
 end
-function WoWHACv4:OnSpellcast(event, unit, _, _, spellId)
+function WoWHACv5:OnSpellcast(event, unit, _, _, spellId)
     if unit == "player" then
-        WoWHACv4.pixel:SetColor(0, 0, 0)
+        WoWHACv5.pixel:SetColor(0, 0, 0)
     end
     if event == "UNIT_SPELLCAST_CHANNEL_START" then
-        local next = WoWHACv4.CURRENT_PROVIDER:GetNextHotKey();
+        local next = WoWHACv5.CURRENT_PROVIDER:GetNextHotKey();
         if next then
-            WoWHACv4.CURRENT_PROVIDER:SetCurrentHotkey(next)
-            WoWHACv4.CURRENT_PROVIDER:SetCurrentId(WoWHACv4.CURRENT_PROVIDER:GetNextId())
+            WoWHACv5.CURRENT_PROVIDER:SetCurrentHotkey(next)
+            WoWHACv5.CURRENT_PROVIDER:SetCurrentId(WoWHACv5.CURRENT_PROVIDER:GetNextId())
         end
     end
 end
 
-function WoWHACv4:UpdatePixel()
+function WoWHACv5:UpdatePixel()
     local casting = UnitCastingInfo("player") ~= nil
     if casting or IsChanneling(300) or IsGCDActive(300) then
-        WoWHACv4.pixel:SetColor(0, 0, 0)
+        WoWHACv5.pixel:SetColor(0, 0, 0)
     else
-        if WoWHACv4.CURRENT_PROVIDER == nil then
+        if WoWHACv5.CURRENT_PROVIDER == nil then
             return
         end
-        local curr = WoWHACv4.CURRENT_PROVIDER:GetCurrentId()
+        local curr = WoWHACv5.CURRENT_PROVIDER:GetCurrentId()
         if curr == nil then
             return
         end
-        local rgb = WoWHACv4.Steganography(WoWHACv4.CURRENT_PROVIDER:GetCurrentHotKey())
-        WoWHACv4.pixel:SetColor(rgb.red, rgb.green, rgb.blue)
+        local rgb = WoWHACv5.Steganography(WoWHACv5.CURRENT_PROVIDER:GetCurrentHotKey())
+        WoWHACv5.pixel:SetColor(rgb.red, rgb.green, rgb.blue)
     end
 end
 
-WoWHACv4:ScheduleRepeatingTimer("UpdatePixel", 0.1)
+WoWHACv5:ScheduleRepeatingTimer("UpdatePixel", 0.1)

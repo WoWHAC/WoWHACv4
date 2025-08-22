@@ -1,4 +1,4 @@
-local _, WoWHACv4 = ...
+local _, WoWHACv5 = ...
 
 local redMap = {
     [7] = 70,
@@ -77,10 +77,10 @@ end
 
 local Steganography = class("Steganography")
 function Steganography:init(keybind)
-    keybind = WoWHACv4:NormalizeModifiers(keybind)
+    keybind = WoWHACv5:NormalizeModifiers(keybind)
     self.keybind = keybind
     self.red = _CalculateRed(keybind);
     self.green = _CalculateGreen(keybind)
     self.blue = self.red;
 end
-WoWHACv4.Steganography = Steganography
+WoWHACv5.Steganography = Steganography

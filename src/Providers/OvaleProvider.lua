@@ -1,11 +1,11 @@
-local _, WoWHACv4 = ...
+local _, WoWHACv5 = ...
 
-local OvaleProvider = WoWHACv4.Provider:extend("OvaleProvider")
+local OvaleProvider = WoWHACv5.Provider:extend("OvaleProvider")
 
 local currentHotkey;
 
 function OvaleProvider:init()
-    WoWHACv4:Log("Supplier found: Ovale.")
+    WoWHACv5:Log("Supplier found: Ovale.")
     local KEY_REPLACEMENTS = {
         ["ALT%-"] = "A",
         ["CTRL%-"] = "C",
@@ -43,7 +43,7 @@ function OvaleProvider:init()
         end
         return key
     end
-    WoWHACv4.ToggleBurstFrame:Show()
+    WoWHACv5.ToggleBurstFrame:Show()
     local function GetSpellIdByName(name)
         return name and Ovale:GetSpellIdByName(name) or nil
     end
@@ -91,10 +91,10 @@ function OvaleProvider:init()
             end
         end
     end
-    WoWHACv4:SecureHook(Ovale.frame, "OnUpdate", function(frame)
+    WoWHACv5:SecureHook(Ovale.frame, "OnUpdate", function(frame)
         local actions = frame.actions
         local spell
-        local order = { 4, 3, (WoWHACv4.burst and 2 or 6), 1 }
+        local order = { 4, 3, (WoWHACv5.burst and 2 or 6), 1 }
         for _, idx in ipairs(order) do
             spell = NormalizeSuggestion(actions[idx])
             if spell then
@@ -113,4 +113,4 @@ function OvaleProvider:GetCurrentId()
     return 0
 end
 
-WoWHACv4.providers["Ovale"] = OvaleProvider
+WoWHACv5.providers["Ovale"] = OvaleProvider

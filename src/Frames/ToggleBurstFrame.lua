@@ -1,11 +1,11 @@
-local _, WoWHACv4 = ...
+local _, WoWHACv5 = ...
 
 local ToggleBurstFrame = class("ToggleBurstFrame")
 
 function ToggleBurstFrame:init()
-    WoWHACv4.burst = false;
+    WoWHACv5.burst = false;
     local parent = (PARENT_NAME and _G[PARENT_NAME]) or UIParent
-    local button = CreateFrame("Button", "WoWHACv4ToggleBurstFrame", parent, "UIPanelButtonTemplate")
+    local button = CreateFrame("Button", "WoWHACv5ToggleBurstFrame", parent, "UIPanelButtonTemplate")
     button:SetSize(40, 20)
     button:SetText("CDs")
     button:SetPoint("CENTER")
@@ -18,8 +18,8 @@ function ToggleBurstFrame:init()
     local fontString = button.Text or button:GetFontString()
     fontString:SetTextColor(1, 0, 0)
     button:SetScript("OnClick", function()
-        WoWHACv4.burst = not WoWHACv4.burst
-        if WoWHACv4.burst then
+        WoWHACv5.burst = not WoWHACv5.burst
+        if WoWHACv5.burst then
             fontString:SetTextColor(0, 1, 0)
         else
             fontString:SetTextColor(1, 0, 0)
@@ -37,4 +37,4 @@ function ToggleBurstFrame:Hide()
     self.btn:Hide()
 end
 
-WoWHACv4.ToggleBurstFrame = ToggleBurstFrame()
+WoWHACv5.ToggleBurstFrame = ToggleBurstFrame()

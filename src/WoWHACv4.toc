@@ -1,6 +1,6 @@
 ## Interface: 80205
-## Title: WoWHACv4
-## Notes: Auxiliary addon for third party software "WoWHACv4".
+## Title: WoWHACv5
+## Notes: Auxiliary addon for third party software "WoWHACv5".
 ## Author: CKATEPTb
 ## Version: 2.1.0
 ## OptionalDeps: WeakAuras, ConRO, Hekili, MaxDps, HeroRotation, Ovale
