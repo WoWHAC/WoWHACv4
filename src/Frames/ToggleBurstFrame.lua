@@ -1,9 +1,20 @@
 local _, WoWHACv5 = ...
 
-local ToggleBurstFrame = class("ToggleBurstFrame")
+-- Класс без 30log
+local ToggleBurstFrame = {}
+ToggleBurstFrame.__index = ToggleBurstFrame
+
+setmetatable(ToggleBurstFrame, {
+    __call = function(cls, ...)
+        local self = setmetatable({}, cls)
+        if self.init then self:init(...) end
+        return self
+    end
+})
 
 function ToggleBurstFrame:init()
-    WoWHACv5.burst = false;
+    WoWHACv5.burst = false
+
     local parent = (PARENT_NAME and _G[PARENT_NAME]) or UIParent
     local button = CreateFrame("Button", "WoWHACv5ToggleBurstFrame", parent, "UIPanelButtonTemplate")
     button:SetSize(40, 20)
@@ -15,8 +26,10 @@ function ToggleBurstFrame:init()
     button:RegisterForDrag("LeftButton")
     button:SetScript("OnDragStart", button.StartMoving)
     button:SetScript("OnDragStop", button.StopMovingOrSizing)
+
     local fontString = button.Text or button:GetFontString()
-    fontString:SetTextColor(1, 0, 0)
+    fontString:SetTextColor(1, 0, 0) -- начальное состояние: выключено
+
     button:SetScript("OnClick", function()
         WoWHACv5.burst = not WoWHACv5.burst
         if WoWHACv5.burst then
@@ -25,6 +38,7 @@ function ToggleBurstFrame:init()
             fontString:SetTextColor(1, 0, 0)
         end
     end)
+
     self.btn = button
     self:Hide()
 end

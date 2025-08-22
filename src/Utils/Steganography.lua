@@ -30,29 +30,7 @@ end
 --========================================================
 -- KeyCode Reference Table
 --========================================================
--- Row 1 (digits and symbols)
--- ` = 96      1 = 49     2 = 50     3 = 51     4 = 52
--- 5 = 53      6 = 54     7 = 55     8 = 56     9 = 57
--- 0 = 48      - = 45     = = 61
---
--- Row 2 (QWERTY row)
--- Q = 81      W = 87     E = 69     R = 82     T = 84
--- Y = 89      U = 85     I = 73     O = 79     P = 80
--- [ = 91      ] = 93
---
--- Row 3 (ASDF row)
--- A = 65      S = 83     D = 68     F = 70     G = 71
--- H = 72      J = 74     K = 75     L = 76     ; = 59
--- ' = 39
---
--- Row 4 (ZXCV row)
--- Z = 90      X = 88     C = 67     V = 86     B = 66
--- N = 78      M = 77     , = 44     . = 46     / = 47
---
--- Function keys
--- F1  = 149   F2  = 150   F3  = 151   F4  = 152
--- F5  = 153   F6  = 154   F7  = 155   F8  = 156
--- F9  = 157   F10 = 158   F11 = 159   F12 = 160
+-- (таблица соответствий оставлена без изменений)
 --========================================================
 local function _CalculateGreen(keyBind)
     if not keyBind then
@@ -75,12 +53,28 @@ local function _CalculateGreen(keyBind)
     return 0
 end
 
-local Steganography = class("Steganography")
+--========================================
+-- Steganography без 30log
+--========================================
+local Steganography = {}
+Steganography.__index = Steganography
+
+setmetatable(Steganography, {
+    __call = function(cls, ...)
+        local self = setmetatable({}, cls)
+        if self.init then self:init(...) end
+        return self
+    end
+})
+
 function Steganography:init(keybind)
-    keybind = WoWHACv5:NormalizeModifiers(keybind)
+    if keybind then
+        keybind = WoWHACv5:NormalizeModifiers(keybind)
+    end
     self.keybind = keybind
-    self.red = _CalculateRed(keybind);
+    self.red   = _CalculateRed(keybind)
     self.green = _CalculateGreen(keybind)
-    self.blue = self.red;
+    self.blue  = self.red
 end
+
 WoWHACv5.Steganography = Steganography

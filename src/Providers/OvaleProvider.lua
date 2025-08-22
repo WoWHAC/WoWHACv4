@@ -1,21 +1,37 @@
 local _, WoWHACv5 = ...
 
-local OvaleProvider = WoWHACv5.Provider:extend("OvaleProvider")
+-- Класс OvaleProvider без 30log
+local OvaleProvider = {}
+OvaleProvider.__index = OvaleProvider
 
-local currentHotkey;
+-- Наследуемся от базового WoWHACv5.Provider
+setmetatable(OvaleProvider, {
+    __index = WoWHACv5.Provider,
+    __call = function(cls, ...)
+        local self = setmetatable({}, cls)
+        if self.init then self:init(...) end
+        return self
+    end
+})
 
 function OvaleProvider:init()
     WoWHACv5:Log("Supplier found: Ovale.")
+
+    -- Пер-экземплярное состояние
+    self.currentHotkey = nil
+
     local KEY_REPLACEMENTS = {
-        ["ALT%-"] = "A",
-        ["CTRL%-"] = "C",
+        ["ALT%-"]   = "A",
+        ["CTRL%-"]  = "C",
         ["SHIFT%-"] = "S",
-        ["NUMPAD"] = "N",
-        ["PLUS"] = "+",
-        ["MINUS"] = "-",
-        ["MULTIPLY"] = "*",
-        ["DIVIDE"] = "/",
+        ["NUMPAD"]  = "N",
+        ["PLUS"]    = "+",
+        ["MINUS"]   = "-",
+        ["MULTIPLY"]= "*",
+        ["DIVIDE"]  = "/",
     }
+
+    -- Переопределяем shortcut-резолвер для Ovale
     function Ovale:ChercherShortcut(slot)
         local name
         if slot > 12 and Bartender4 then
@@ -33,21 +49,24 @@ function OvaleProvider:init()
                 name = "MULTIACTIONBAR1BUTTON" .. (slot - 60)
             end
         end
+
         local key = name and GetBindingKey(name)
         if key then
             key = key:upper():gsub("%s+", "")
-            -- заменить всё по словарю
             for pat, repl in pairs(KEY_REPLACEMENTS) do
                 key = key:gsub(pat, repl)
             end
         end
         return key
     end
+
     WoWHACv5.ToggleBurstFrame:Show()
+
     local function GetSpellIdByName(name)
         return name and Ovale:GetSpellIdByName(name) or nil
     end
 
+    -- Кэш для ItemName -> ItemID
     local itemCache = {}
     local _GetItemSpell = GetItemSpell
     function GetItemSpell(id, ...)
@@ -65,24 +84,20 @@ function OvaleProvider:init()
     local function IsReady(start, duration)
         return (start or 0) <= 0 or ((start + (duration or 0) - GetTime()) <= 0)
     end
+
     local function NormalizeSuggestion(spell)
-        if not spell then
+        if not spell or not spell.spellName then
             return
         end
 
-        local spellName = spell.spellName
-        if not spellName then
-            return
-        end
-
-        local spellId = GetSpellIdByName(spellName)
+        local spellId = GetSpellIdByName(spell.spellName)
         if spellId then
             local cd = C_Spell.GetSpellCooldown(spellId)
             if IsReady(cd.startTime, cd.duration) then
                 return spell.icons[1].shortcut:GetText()
             end
         else
-            local itemId = GetItemIdByName(spellName)
+            local itemId = GetItemIdByName(spell.spellName)
             if itemId then
                 local start, duration = GetItemCooldown(itemId)
                 if IsReady(start, duration) then
@@ -91,26 +106,27 @@ function OvaleProvider:init()
             end
         end
     end
+
+    -- Хук обновления кадров Ovale
     WoWHACv5:SecureHook(Ovale.frame, "OnUpdate", function(frame)
         local actions = frame.actions
         local spell
         local order = { 4, 3, (WoWHACv5.burst and 2 or 6), 1 }
         for _, idx in ipairs(order) do
             spell = NormalizeSuggestion(actions[idx])
-            if spell then
-                break
-            end
+            if spell then break end
         end
-
-        currentHotkey = spell
+        self.currentHotkey = spell
     end)
 end
+
 function OvaleProvider:GetCurrentHotKey()
-    return currentHotkey
+    return self.currentHotkey
 end
 
 function OvaleProvider:GetCurrentId()
     return 0
 end
 
+WoWHACv5.providers = WoWHACv5.providers or {}
 WoWHACv5.providers["Ovale"] = OvaleProvider
