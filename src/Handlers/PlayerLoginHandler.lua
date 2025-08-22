@@ -15,7 +15,7 @@ function PlayerLoginHandler:PLAYER_ENTERING_WORLD()
         end
     end
     if WoWHACv5.CURRENT_PROVIDER == nil then
-        WoWHACv5.CURRENT_PROVIDER = Provider()
+        WoWHACv5.CURRENT_PROVIDER = WoWHACv5.Provider()
     end
     WoWHACv5:SendMessage("WOWHACV4_WA_PRESENTS", C_AddOns.IsAddOnLoaded("WeakAuras"))
 end
