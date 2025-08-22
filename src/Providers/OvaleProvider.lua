@@ -1,10 +1,12 @@
 local _, WoWHACv5 = ...
 
-local OvaleProvider = WoWHACv5.Provider:extend("OvaleProvider")
+local OvaleProvider = setmetatable({}, { __index = WoWHACv5.Provider })
+OvaleProvider.__index = OvaleProvider
 
-local currentHotkey;
+local currentHotkey
 
-function OvaleProvider:init()
+function OvaleProvider:new()
+    local self = setmetatable(WoWHACv5.Provider:new(), OvaleProvider)
     WoWHACv5:Log("Supplier found: Ovale.")
     local KEY_REPLACEMENTS = {
         ["ALT%-"] = "A",
@@ -36,7 +38,6 @@ function OvaleProvider:init()
         local key = name and GetBindingKey(name)
         if key then
             key = key:upper():gsub("%s+", "")
-            -- заменить всё по словарю
             for pat, repl in pairs(KEY_REPLACEMENTS) do
                 key = key:gsub(pat, repl)
             end
@@ -66,23 +67,16 @@ function OvaleProvider:init()
         return (start or 0) <= 0 or ((start + (duration or 0) - GetTime()) <= 0)
     end
     local function NormalizeSuggestion(spell)
-        if not spell then
-            return
-        end
+        if not spell or not spell.spellName then return end
 
-        local spellName = spell.spellName
-        if not spellName then
-            return
-        end
-
-        local spellId = GetSpellIdByName(spellName)
+        local spellId = GetSpellIdByName(spell.spellName)
         if spellId then
             local cd = C_Spell.GetSpellCooldown(spellId)
             if IsReady(cd.startTime, cd.duration) then
                 return spell.icons[1].shortcut:GetText()
             end
         else
-            local itemId = GetItemIdByName(spellName)
+            local itemId = GetItemIdByName(spell.spellName)
             if itemId then
                 local start, duration = GetItemCooldown(itemId)
                 if IsReady(start, duration) then
@@ -93,17 +87,16 @@ function OvaleProvider:init()
     end
     WoWHACv5:SecureHook(Ovale.frame, "OnUpdate", function(frame)
         local actions = frame.actions
-        local spell
         local order = { 4, 3, (WoWHACv5.burst and 2 or 6), 1 }
+        local spell
         for _, idx in ipairs(order) do
             spell = NormalizeSuggestion(actions[idx])
-            if spell then
-                break
-            end
+            if spell then break end
         end
 
         currentHotkey = spell
     end)
+    return self
 end
 function OvaleProvider:GetCurrentHotKey()
     return currentHotkey
@@ -113,4 +106,18 @@ function OvaleProvider:GetCurrentId()
     return 0
 end
 
-WoWHACv5.providers["Ovale"] = OvaleProvider
+function OvaleProvider:SetCurrentHotKey(hotkey)
+end
+
+function OvaleProvider:SetCurrentId(spellId)
+end
+
+function OvaleProvider:GetNextHotKey()
+    return nil
+end
+
+function OvaleProvider:GetNextId()
+    return nil
+end
+
+WoWHACv5.providers["Ovale"] = OvaleProvider.new

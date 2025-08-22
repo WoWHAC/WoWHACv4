@@ -1,9 +1,11 @@
 local _, WoWHACv5 = ...
 
-local ToggleBurstFrame = class("ToggleBurstFrame")
+local ToggleBurstFrame = {}
+ToggleBurstFrame.__index = ToggleBurstFrame
 
-function ToggleBurstFrame:init()
-    WoWHACv5.burst = false;
+function ToggleBurstFrame:new()
+    local self = setmetatable({}, ToggleBurstFrame)
+    WoWHACv5.burst = false
     local parent = (PARENT_NAME and _G[PARENT_NAME]) or UIParent
     local button = CreateFrame("Button", "WoWHACv5ToggleBurstFrame", parent, "UIPanelButtonTemplate")
     button:SetSize(40, 20)
@@ -27,6 +29,7 @@ function ToggleBurstFrame:init()
     end)
     self.btn = button
     self:Hide()
+    return self
 end
 
 function ToggleBurstFrame:Show()
@@ -37,4 +40,4 @@ function ToggleBurstFrame:Hide()
     self.btn:Hide()
 end
 
-WoWHACv5.ToggleBurstFrame = ToggleBurstFrame()
+WoWHACv5.ToggleBurstFrame = ToggleBurstFrame:new()

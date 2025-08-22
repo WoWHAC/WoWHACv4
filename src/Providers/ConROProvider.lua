@@ -1,35 +1,43 @@
 local _, WoWHACv5 = ...
 
-local ConROProvider = WoWHACv5.Provider:extend("ConROProvider")
+local ConROProvider = {}
+ConROProvider.__index = ConROProvider
 
-local currentId;
-local currentHotkey;
-local nextId;
-local nextHotkey;
-function ConROProvider:init()
+local currentId
+local currentHotkey
+local nextId
+local nextHotkey
+
+function ConROProvider:new()
+    local self = setmetatable({}, ConROProvider)
+
     WoWHACv5:Log("Supplier found: ConRO.")
+
     if ConROWindow and ConROWindow.fontkey then
         local Keybind = ConROWindow.fontkey
         local last = Keybind:GetText()
         WoWHACv5:SecureHook(Keybind, "SetText", function(_, txt)
             if txt ~= last then
                 last = txt
-                currentId = ConRO.Spell;
-                currentHotkey = txt;
+                currentId = ConRO.Spell
+                currentHotkey = txt
             end
         end)
     end
+
     if ConROWindow2 and ConROWindow2.fontkey then
         local Keybind = ConROWindow2.fontkey
         local last = Keybind:GetText()
         WoWHACv5:SecureHook(Keybind, "SetText", function(_, txt)
             if txt ~= last then
                 last = txt
-                nextId = ConRO.SuggestedSpells[2];
-                nextHotkey = txt;
+                nextId = ConRO.SuggestedSpells[2]
+                nextHotkey = txt
             end
         end)
     end
+
+    return self
 end
 
 function ConROProvider:GetCurrentHotKey()
@@ -49,13 +57,11 @@ function ConROProvider:GetCurrentId()
 end
 
 function ConROProvider:GetNextHotKey()
-    --return nil
     return nextHotkey
 end
 
 function ConROProvider:GetNextId()
-    --return nil
     return nextId
 end
 
-WoWHACv5.providers["ConRO"] = ConROProvider
+WoWHACv5.providers["ConRO"] = ConROProvider.new

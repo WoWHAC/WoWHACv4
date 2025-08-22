@@ -1,9 +1,12 @@
 local _, WoWHACv5 = ...
 
-local Provider = class("Provider")
+local Provider = {}
+Provider.__index = Provider
 
-function Provider:init()
+function Provider:new()
+    local self = setmetatable({}, Provider)
     WoWHACv5:Log("No rotation suppliers found. A list of available suppliers can be found at https://wowhac.fun/")
+    return self
 end
 
 function Provider:GetCurrentHotKey()
@@ -11,11 +14,9 @@ function Provider:GetCurrentHotKey()
 end
 
 function Provider:SetCurrentHotKey(hotkey)
-
 end
 
 function Provider:SetCurrentId(spellId)
-
 end
 
 function Provider:GetCurrentId()
@@ -30,4 +31,4 @@ function Provider:GetNextId()
     return nil
 end
 
-WoWHACv5.Provider = Provider
+WoWHACv5.Provider = Provider.new
