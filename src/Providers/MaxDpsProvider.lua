@@ -1,12 +1,12 @@
 local _, WoWHACv5 = ...
 
-local MaxDpsProvider = setmetatable({}, { __index = WoWHACv5.Provider })
+local MaxDpsProvider = {}
 MaxDpsProvider.__index = MaxDpsProvider
 
 local currentHotkey
 
 function MaxDpsProvider:new()
-    local self = setmetatable(WoWHACv5.Provider:new(), MaxDpsProvider)
+    local self = setmetatable({}, MaxDpsProvider)
 
     WoWHACv5:Log("Supplier found: MaxDps.")
     WoWHACv5:RegisterMessage("WOWHACV4_WA_PRESENTS", function(_, _, isLoaded)

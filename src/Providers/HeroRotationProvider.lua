@@ -1,12 +1,12 @@
 local _, WoWHACv5 = ...
 
-local HeroRotationProvider = setmetatable({}, { __index = WoWHACv5.Provider })
+local HeroRotationProvider = {}
 HeroRotationProvider.__index = HeroRotationProvider
 
 local currentHotkey
 
 function HeroRotationProvider:new()
-    local self = setmetatable(WoWHACv5.Provider:new(), HeroRotationProvider)
+    local self = setmetatable({}, HeroRotationProvider)
 
     WoWHACv5:Log("Supplier found: HeroRotation.")
 

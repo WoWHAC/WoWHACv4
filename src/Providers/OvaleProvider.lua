@@ -1,12 +1,12 @@
 local _, WoWHACv5 = ...
 
-local OvaleProvider = setmetatable({}, { __index = WoWHACv5.Provider })
+local OvaleProvider = {}
 OvaleProvider.__index = OvaleProvider
 
 local currentHotkey
 
 function OvaleProvider:new()
-    local self = setmetatable(WoWHACv5.Provider:new(), OvaleProvider)
+    local self = setmetatable({}, OvaleProvider)
     WoWHACv5:Log("Supplier found: Ovale.")
     local KEY_REPLACEMENTS = {
         ["ALT%-"] = "A",
