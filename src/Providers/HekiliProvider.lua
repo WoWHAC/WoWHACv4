@@ -13,20 +13,20 @@ function HekiliProvider:init()
             WoWHACv4:SecureHook(WeakAuras, "ScanEvents", function(event, display, spellId, _, _, arg5)
                 if event == "HEKILI_RECOMMENDATION_UPDATE" then
                     if arg5 then
+                        local next = arg5[2]
+                        if next then
+                            local keybind = next.keybind
+                            if nextKeybind ~= nextHotkey then
+                                nextHotkey = keybind
+                                nextId = next.actionID
+                            end
+                        end
                         local current = arg5[1]
                         if current then
                             local keybind = current.keybind
-                            if keybind ~= currentHotkey then
+                            if keybind ~= currentHotkey and keybind ~= nextHotkey then
                                 currentHotkey = keybind
                                 currentId = spellId
-                                local next = arg5[2]
-                                if next then
-                                    local nextKeybind = next.keybind
-                                    if nextKeybind ~= nextHotkey then
-                                        nextHotkey = nextKeybind
-                                        nextId = next.actionID
-                                    end
-                                end
                             end
                         end
                     end
@@ -42,15 +42,25 @@ function HekiliProvider:GetCurrentHotKey()
     return currentHotkey
 end
 
+function HekiliProvider:SetCurrentHotKey(hotkey)
+    currentHotkey = hotkey
+end
+
+function HekiliProvider:SetCurrentId(spellId)
+    currentId = spellId
+end
+
 function HekiliProvider:GetCurrentId()
     return currentId
 end
 
 function HekiliProvider:GetNextHotKey()
+    --return nil
     return nextHotkey
 end
 
 function HekiliProvider:GetNextId()
+    --return nil
     return nextId
 end
 

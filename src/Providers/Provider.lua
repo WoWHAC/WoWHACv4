@@ -10,6 +10,14 @@ function Provider:GetCurrentHotKey()
     return nil
 end
 
+function Provider:SetCurrentHotKey(hotkey)
+
+end
+
+function Provider:SetCurrentId(spellId)
+
+end
+
 function Provider:GetCurrentId()
     return nil
 end

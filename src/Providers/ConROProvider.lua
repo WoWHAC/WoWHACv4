@@ -36,15 +36,25 @@ function ConROProvider:GetCurrentHotKey()
     return currentHotkey
 end
 
+function ConROProvider:SetCurrentHotKey(hotkey)
+    currentHotkey = hotkey
+end
+
+function ConROProvider:SetCurrentId(spellId)
+    currentId = spellId
+end
+
 function ConROProvider:GetCurrentId()
     return currentId
 end
 
 function ConROProvider:GetNextHotKey()
+    --return nil
     return nextHotkey
 end
 
 function ConROProvider:GetNextId()
+    --return nil
     return nextId
 end
 
