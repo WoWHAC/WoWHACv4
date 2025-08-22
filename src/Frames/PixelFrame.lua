@@ -28,6 +28,15 @@ local previousR, previousG, previousB = 0, 0, 0
 function PixelFrame:SetColor(r, g, b)
     local result = false
     if r ~= previousR or g ~= previousG or b ~= previousB then
+        if r == nil then
+            r = 0
+        end
+        if g == nil then
+            g = 0
+        end
+        if b == nil then
+            b = 0
+        end
         WoWHACv5:Debug("Change pixel color to R: " .. r .. " G: " .. g .. " B: " .. b)
         result = true
     end
