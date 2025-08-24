@@ -51,6 +51,7 @@ function WoWHACv5:OnSpellcast(event, unit, _, _, spellId)
     if unit == "player" then
         WoWHACv5.pixel:SetColor(0, 0, 0)
     end
+    WoWHACv5:NoChanges()
     if event == "UNIT_SPELLCAST_CHANNEL_START" then
         local next = WoWHACv5:GetNextHotKey();
         if next then
@@ -65,11 +66,16 @@ function WoWHACv5:UpdatePixel()
     if casting or IsChanneling(300) or IsGCDActive(300) then
         WoWHACv5.pixel:SetColor(0, 0, 0)
     else
-        local curr = WoWHACv5:GetCurrentId()
-        if curr == nil then
-            return
+        local curr = WoWHACv5:GetCurrentHotKey()
+        if curr == nil or not WoWHACv5:HasChanges() then
+            local next = WoWHACv5:GetNextHotKey()
+            if next ~= nil then
+                curr = next
+            else
+                return
+            end
         end
-        local rgb = WoWHACv5.Steganography(WoWHACv5:GetCurrentHotKey())
+        local rgb = WoWHACv5.Steganography(curr)
         WoWHACv5.pixel:SetColor(rgb.red, rgb.green, rgb.blue)
     end
 end

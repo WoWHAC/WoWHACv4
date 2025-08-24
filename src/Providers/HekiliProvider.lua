@@ -8,21 +8,20 @@ WoWHACv5.providers["Hekili"] = function ()
         if isLoaded then
             WoWHACv5:SecureHook(WeakAuras, "ScanEvents", function(event, display, spellId, _, _, arg5)
                 if event == "HEKILI_RECOMMENDATION_UPDATE" and arg5 then
-                    local nextRec = arg5[2]
-                    if nextRec then
-                        local keybind = nextRec.keybind
-                        if keybind ~= WoWHACv5:GetNextHotKey() then
-                            WoWHACv5:SetNextId(nextRec.actionID)
-                            WoWHACv5:SetNextHotKey(keybind)
-                        end
-                    end
-
                     local currentRec = arg5[1]
                     if currentRec then
                         local keybind = currentRec.keybind
                         if keybind ~= WoWHACv5:GetCurrentHotKey() and keybind ~= WoWHACv5:GetNextHotKey() then
                             WoWHACv5:SetCurrentId(currentRec.actionID or spellId)
                             WoWHACv5:SetCurrentHotKey(keybind)
+                        end
+                    end
+                    local nextRec = arg5[2]
+                    if nextRec then
+                        local keybind = nextRec.keybind
+                        if keybind ~= WoWHACv5:GetNextHotKey() then
+                            WoWHACv5:SetNextId(nextRec.actionID)
+                            WoWHACv5:SetNextHotKey(keybind)
                         end
                     end
                 end
