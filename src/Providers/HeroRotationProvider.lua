@@ -1,23 +1,8 @@
 local _, WoWHACv5 = ...
 
-local Base = WoWHACv5.Provider
-
--- Класс HeroRotationProvider без 30log
-local HeroRotationProvider = {}
-HeroRotationProvider.__index = HeroRotationProvider
-
-setmetatable(HeroRotationProvider, {
-    __index = Base,
-    __call = function(cls, ...)
-        local self = setmetatable({}, cls)
-        if self.init then self:init(...) end
-        return self
-    end
-})
-
-function HeroRotationProvider:init()
+WoWHACv5.providers = WoWHACv5.providers or {}
+WoWHACv5.providers["HeroRotation"] = function()
     WoWHACv5:Log("Supplier found: HeroRotation.")
-    self.currentHotkey = nil
 
     local Keybind = HeroRotation.MainIconFrame.Keybind
     local last = Keybind:GetText()
@@ -28,7 +13,7 @@ function HeroRotationProvider:init()
         if rightSuggest and rightSuggest:IsVisible() then
             local suggestedHotkey = rightSuggest:GetText()
             if suggestedHotkey and suggestedHotkey ~= "" then
-                self.currentHotkey = suggestedHotkey
+                WoWHACv5:SetCurrentHotKey(suggestedHotkey)
                 return
             end
         end
@@ -38,7 +23,7 @@ function HeroRotationProvider:init()
         if suggested and suggested:IsVisible() then
             local suggestedHotkey = suggested:GetText()
             if suggestedHotkey and suggestedHotkey ~= "" then
-                self.currentHotkey = suggestedHotkey
+                WoWHACv5:SetCurrentHotKey(suggestedHotkey)
                 return
             end
         end
@@ -51,24 +36,13 @@ function HeroRotationProvider:init()
         if burst and burst:IsVisible() then
             local burstHotkey = burst:GetText()
             if burstHotkey and burstHotkey ~= "" then
-                self.currentHotkey = burstHotkey
+                WoWHACv5:SetCurrentHotKey(burstHotkey)
                 return
             end
         end
 
         if txt ~= last then
-            self.currentHotkey = txt
+            WoWHACv5:SetCurrentHotKey(txt)
         end
     end)
 end
-
-function HeroRotationProvider:GetCurrentHotKey()
-    return self.currentHotkey
-end
-
-function HeroRotationProvider:GetCurrentId()
-    return 0
-end
-
-WoWHACv5.providers = WoWHACv5.providers or {}
-WoWHACv5.providers["HeroRotation"] = HeroRotationProvider

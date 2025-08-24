@@ -1,36 +1,18 @@
 local _, WoWHACv5 = ...
 
--- Класс OvaleProvider без 30log
-local OvaleProvider = {}
-OvaleProvider.__index = OvaleProvider
-
--- Наследуемся от базового WoWHACv5.Provider
-setmetatable(OvaleProvider, {
-    __index = WoWHACv5.Provider,
-    __call = function(cls, ...)
-        local self = setmetatable({}, cls)
-        if self.init then self:init(...) end
-        return self
-    end
-})
-
-function OvaleProvider:init()
+WoWHACv5.providers = WoWHACv5.providers or {}
+WoWHACv5.providers["Ovale"] = function()
     WoWHACv5:Log("Supplier found: Ovale.")
-
-    -- Пер-экземплярное состояние
-    self.currentHotkey = nil
-
     local KEY_REPLACEMENTS = {
-        ["ALT%-"]   = "A",
-        ["CTRL%-"]  = "C",
+        ["ALT%-"] = "A",
+        ["CTRL%-"] = "C",
         ["SHIFT%-"] = "S",
-        ["NUMPAD"]  = "N",
-        ["PLUS"]    = "+",
-        ["MINUS"]   = "-",
-        ["MULTIPLY"]= "*",
-        ["DIVIDE"]  = "/",
+        ["NUMPAD"] = "N",
+        ["PLUS"] = "+",
+        ["MINUS"] = "-",
+        ["MULTIPLY"] = "*",
+        ["DIVIDE"] = "/",
     }
-
     -- Переопределяем shortcut-резолвер для Ovale
     function Ovale:ChercherShortcut(slot)
         local name
@@ -114,19 +96,10 @@ function OvaleProvider:init()
         local order = { 4, 3, (WoWHACv5.burst and 2 or 6), 1 }
         for _, idx in ipairs(order) do
             spell = NormalizeSuggestion(actions[idx])
-            if spell then break end
+            if spell then
+                break
+            end
         end
-        self.currentHotkey = spell
+        WoWHACv5:SetCurrentHotKey(spell)
     end)
 end
-
-function OvaleProvider:GetCurrentHotKey()
-    return self.currentHotkey
-end
-
-function OvaleProvider:GetCurrentId()
-    return 0
-end
-
-WoWHACv5.providers = WoWHACv5.providers or {}
-WoWHACv5.providers["Ovale"] = OvaleProvider

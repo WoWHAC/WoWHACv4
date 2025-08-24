@@ -1,31 +1,8 @@
 local _, WoWHACv5 = ...
 
-local Base = WoWHACv5.Provider
-
--- Класс MaxDpsProvider без 30log
-local MaxDpsProvider = {}
-MaxDpsProvider.__index = MaxDpsProvider
-
--- Вызываемый конструктор с корректным fallback к Base для инстансов
-setmetatable(MaxDpsProvider, {
-    __index = Base,
-    __call = function(cls, ...)
-        local self = setmetatable({}, {
-            __index = function(_, k)
-                local v = MaxDpsProvider[k]
-                if v ~= nil then return v end
-                return Base and Base[k] or nil
-            end
-        })
-        if self.init then self:init(...) end
-        return self
-    end
-})
-
-function MaxDpsProvider:init()
+WoWHACv5.providers = WoWHACv5.providers or {}
+WoWHACv5.providers["MaxDps"] = function()
     WoWHACv5:Log("Supplier found: MaxDps.")
-    self.currentHotkey = nil
-
     WoWHACv5:RegisterMessage("WOWHACV4_WA_PRESENTS", function(_, _, isLoaded)
         if isLoaded then
             WoWHACv5.ToggleBurstFrame:Show()
@@ -35,8 +12,7 @@ function MaxDpsProvider:init()
                         if frame and frame:IsVisible() then
                             if WoWHACv5.burst or frame.ovType ~= "cooldown" then
                                 local button = frame:GetParent()
-                                -- как в оригинале: берём текст хоткея у кнопки
-                                self.currentHotkey = button.HotKey:GetText()
+                                WoWHACv5:SetCurrentHotKey(button.HotKey:GetText())
                                 return
                             end
                         end
@@ -49,14 +25,3 @@ function MaxDpsProvider:init()
         end
     end)
 end
-
-function MaxDpsProvider:GetCurrentHotKey()
-    return self.currentHotkey
-end
-
-function MaxDpsProvider:GetCurrentId()
-    return 0
-end
-
-WoWHACv5.providers = WoWHACv5.providers or {}
-WoWHACv5.providers["MaxDps"] = MaxDpsProvider

@@ -1,48 +1,48 @@
 local _, WoWHACv5 = ...
 
-local Provider = {}
-Provider.__index = Provider
+local currentId = 0
+local currentHotkey
+local nextId
+local nextHotkey
 
-setmetatable(Provider, {
-    __call = function(cls, ...)
-        local self = setmetatable({}, cls)
-        if self.init then self:init(...) end
-        return self
+function WoWHACv5:GetCurrentHotKey()
+    return currentHotkey
+end
+
+function WoWHACv5:GetCurrentId()
+    return currentId
+end
+
+function WoWHACv5:SetCurrentHotKey(hotkey)
+    if hotkey then
+        WoWHACv5:Debug("Current hotkey is: " .. hotkey)
     end
-})
+    currentHotkey = hotkey
+end
 
-function Provider:init()
-    -- Внутреннее состояние
-    self._currentHotKey = nil
-    self._currentId     = nil
-    self._nextHotKey    = nil
-    self._nextId        = nil
+function WoWHACv5:SetCurrentId(spellId)
+    currentId = spellId
+end
 
+function WoWHACv5:GetNextHotKey()
+    return nextHotkey
+end
+
+function WoWHACv5:GetNextId()
+    return nextId
+end
+
+function WoWHACv5:SetNextHotKey(hotkey)
+    if hotkey then
+        WoWHACv5:Debug("Next hotkey is: " .. hotkey)
+    end
+    nextHotkey = hotkey
+end
+
+function WoWHACv5:SetNextId(spellId)
+    nextId = spellId
+end
+
+WoWHACv5.Provider = function()
     WoWHACv5:Log("No rotation suppliers found. A list of available suppliers can be found at https://wowhac.fun/")
 end
-
-function Provider:GetCurrentHotKey()
-    return self._currentHotKey
-end
-
-function Provider:SetCurrentHotKey(hotkey)
-    self._currentHotKey = hotkey
-end
-
-function Provider:SetCurrentId(spellId)
-    self._currentId = spellId
-end
-
-function Provider:GetCurrentId()
-    return self._currentId
-end
-
-function Provider:GetNextHotKey()
-    return self._nextHotKey
-end
-
-function Provider:GetNextId()
-    return self._nextId
-end
-
-WoWHACv5.Provider = Provider
