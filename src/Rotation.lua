@@ -51,14 +51,18 @@ function WoWHACv5:OnSpellcast(event, unit, _, _, spellId)
     if unit == "player" then
         WoWHACv5.pixel:SetColor(0, 0, 0)
     end
-    WoWHACv5:NoChanges()
-    if event == "UNIT_SPELLCAST_CHANNEL_START" then
-        local next = WoWHACv5:GetNextHotKey();
-        if next then
-            WoWHACv5:SetCurrentHotKey(next)
-            WoWHACv5:SetCurrentId(WoWHACv5:GetNextId())
-        end
+    local next = WoWHACv5:GetNextHotKey();
+    if next then
+        WoWHACv5:SetCurrentHotKey(next)
+        WoWHACv5:SetCurrentId(WoWHACv5:GetNextId())
     end
+    --if event == "UNIT_SPELLCAST_CHANNEL_START" then
+    --    local next = WoWHACv5:GetNextHotKey();
+    --    if next then
+    --        WoWHACv5:SetCurrentHotKey(next)
+    --        WoWHACv5:SetCurrentId(WoWHACv5:GetNextId())
+    --    end
+    --end
 end
 
 function WoWHACv5:UpdatePixel()
@@ -67,13 +71,8 @@ function WoWHACv5:UpdatePixel()
         WoWHACv5.pixel:SetColor(0, 0, 0)
     else
         local curr = WoWHACv5:GetCurrentHotKey()
-        if curr == nil or not WoWHACv5:HasChanges() then
-            local next = WoWHACv5:GetNextHotKey()
-            if next ~= nil then
-                curr = next
-            else
-                return
-            end
+        if curr == nil then
+            return
         end
         local rgb = WoWHACv5.Steganography(curr)
         WoWHACv5.pixel:SetColor(rgb.red, rgb.green, rgb.blue)
