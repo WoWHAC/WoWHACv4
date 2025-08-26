@@ -44,6 +44,9 @@ local function CanCast(spellID, unit, threshold)
     if not usable then
         return false
     end
+    --if IsGCDActive(threshold*2) then
+    --    return false
+    --end
     if IsCooldownActive(spellID, threshold) then
         return false, "On cooldown"
     end
@@ -88,7 +91,7 @@ end
 function WoWHACv5:UpdatePixel()
     local casting = UnitCastingInfo("player") ~= nil
     local currentId = WoWHACv5:GetCurrentId()
-    if casting or IsChanneling(300) --[[or IsGCDActive(300)]] or (currentId ~= nil and currentId > 0 and not CanCast(currentId, "target", 300)) then
+    if casting or IsChanneling(300) or (currentId ~= nil and currentId > 0 and not CanCast(currentId, "target", 300)) then
         WoWHACv5.pixel:SetColor(0, 0, 0)
     else
         local curr = WoWHACv5:GetCurrentHotKey()
