@@ -39,6 +39,26 @@ local function IsChanneling(threshold)
     return false
 end
 
+local function CanCast(spellID, unit, threshold)
+    local usable = C_Spell.IsSpellUsable(spellID)
+    if not usable then
+        return false
+    end
+    if IsCooldownActive(spellID, threshold) then
+        return false, "On cooldown"
+    end
+    if unit and C_Spell.IsSpellHarmful(spellID) then
+        local inRange = C_Spell.IsSpellInRange(spellID, unit)
+        if inRange == 0 or inRange == false or inRange == nil then
+            return false
+        end
+        if not C_Spell.CanSpellBeCastOnUnit(spellID, unit) then
+            return false
+        end
+    end
+    return true
+end
+
 local SpellCastEventHandler = WoWHACv5:NewModule("SpellCastEventHandler", "AceEvent-3.0")
 
 function SpellCastEventHandler:OnEnable()
@@ -67,7 +87,8 @@ end
 
 function WoWHACv5:UpdatePixel()
     local casting = UnitCastingInfo("player") ~= nil
-    if casting or IsChanneling(300) or IsGCDActive(300) then
+    local currentId = WoWHACv5:GetCurrentId()
+    if casting or IsChanneling(300) --[[or IsGCDActive(300)]] or (currentId ~= nil and currentId > 0 and not CanCast(currentId, "target", 300)) then
         WoWHACv5.pixel:SetColor(0, 0, 0)
     else
         local curr = WoWHACv5:GetCurrentHotKey()
