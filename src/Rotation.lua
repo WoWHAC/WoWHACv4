@@ -52,7 +52,7 @@ local function CanCast(spellID, unit, threshold)
     end
     if unit and C_Spell.IsSpellHarmful(spellID) then
         local inRange = C_Spell.IsSpellInRange(spellID, unit)
-        if inRange == 0 or inRange == false or inRange == nil then
+        if inRange == 0 or inRange == false then
             return false
         end
         if not C_Spell.CanSpellBeCastOnUnit(spellID, unit) then
