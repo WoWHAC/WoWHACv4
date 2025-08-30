@@ -16,6 +16,7 @@ Frames\ToggleBurstFrame.lua
 Providers\Provider.lua
 Providers\HekiliProvider.lua
 Providers\ConROProvider.lua
+Providers\ConROCProvider.lua
 Providers\HeroRotationProvider.lua
 Providers\MaxDpsProvider.lua
 Providers\OvaleProvider.lua
