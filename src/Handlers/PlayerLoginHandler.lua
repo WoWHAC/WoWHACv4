@@ -17,7 +17,7 @@ function PlayerLoginHandler:PLAYER_ENTERING_WORLD()
         end
     end
     if initialized == false then
-        WoWHACv5.Provider()
+        pcall(WoWHACv5.Provider)
     end
     WoWHACv5:SendMessage("WOWHACV4_WA_PRESENTS", C_AddOns.IsAddOnLoaded("WeakAuras"))
 end

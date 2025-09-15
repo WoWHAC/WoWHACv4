@@ -50,6 +50,10 @@ local function CanCast(spellID, unit, threshold)
     if IsCooldownActive(spellID, threshold) then
         return false, "On cooldown"
     end
+    local inCombat = UnitAffectingCombat("player")
+    if inCombat then
+        return true
+    end
     if unit and C_Spell.IsSpellHarmful(spellID) then
         local inRange = C_Spell.IsSpellInRange(spellID, unit)
         if inRange == 0 or inRange == false then
