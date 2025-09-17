@@ -16,14 +16,14 @@ WoWHACv5.providers["Hekili"] = function ()
                             WoWHACv5:SetCurrentHotKey(keybind)
                         end
                     end
-                    local nextRec = arg5[2]
-                    if nextRec then
-                        local keybind = nextRec.keybind
-                        if keybind ~= WoWHACv5:GetNextHotKey() then
-                            WoWHACv5:SetNextId(nextRec.actionID)
-                            WoWHACv5:SetNextHotKey(keybind)
-                        end
-                    end
+                    --local nextRec = arg5[2]
+                    --if nextRec then
+                    --    local keybind = nextRec.keybind
+                    --    if keybind ~= WoWHACv5:GetNextHotKey() then
+                    --        WoWHACv5:SetNextId(nextRec.actionID)
+                    --        WoWHACv5:SetNextHotKey(keybind)
+                    --    end
+                    --end
                 end
             end)
         else
