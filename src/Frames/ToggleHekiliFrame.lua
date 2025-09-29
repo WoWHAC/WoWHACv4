@@ -26,7 +26,7 @@ function WoWHACv5.ToggleHekiliFrame:Init()
     self:AddButton("essences", "E", "Toggle Minor Cooldowns")
     self:AddButton("interrupts", "I", "Toggle Interrupts")
     self:AddButton("defensives", "D", "Toggle Defensives")
-    self:AddButton("potions", "P", "Toggle Potions)")
+    self:AddButton("potions", "P", "Toggle Potions")
     self:AddButton("custom1", "1", "Toggle " .. Hekili.DB.profile.toggles.custom1.name)
     self:AddButton("custom2", "2", "Toggle " ..  Hekili.DB.profile.toggles.custom2.name)
 end
