@@ -3,6 +3,7 @@ local _, WoWHACv5 = ...
 WoWHACv5.providers = WoWHACv5.providers or {}
 WoWHACv5.providers["Hekili"] = function ()
     WoWHACv5:Log("Supplier found: Hekili.")
+    WoWHACv5.ToggleHekiliFrame:Init()
 
     WoWHACv5:RegisterMessage("WOWHACV4_WA_PRESENTS", function(_, _, isLoaded)
         if isLoaded then
