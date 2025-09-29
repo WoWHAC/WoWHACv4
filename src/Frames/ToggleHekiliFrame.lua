@@ -6,6 +6,9 @@ local tostring = tostring
 WoWHACv5.ToggleHekiliFrame = CreateFrame("Frame", "WoWHACv5_ToggleHekiliFrame", UIParent)
 
 function WoWHACv5.ToggleHekiliFrame:Init()
+    if self.Button then
+        return
+    end
     -- Frame Init
     self:SetPoint("CENTER")
     self:SetClampedToScreen(true)
