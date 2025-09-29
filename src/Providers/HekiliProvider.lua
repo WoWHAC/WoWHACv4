@@ -16,6 +16,9 @@ WoWHACv5.providers["Hekili"] = function ()
                             WoWHACv5:SetCurrentId(currentRec.actionID or spellId)
                             WoWHACv5:SetCurrentHotKey(keybind)
                         end
+                        if currentRec.indicator == "cycle" then
+                            WoWHACv5:SetCurrentHotKey("s-n")
+                        end
                     end
                     --local nextRec = arg5[2]
                     --if nextRec then
