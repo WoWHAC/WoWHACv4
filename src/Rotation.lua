@@ -40,6 +40,10 @@ local function IsChanneling(threshold)
 end
 
 local function CanCast(spellID, unit, threshold)
+    local empower = GetUnitEmpowerStageDuration("player", 3)
+    if empower > 0 then
+        return true
+    end
     local usable = C_Spell.IsSpellUsable(spellID)
     if not usable then
         return false

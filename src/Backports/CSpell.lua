@@ -36,3 +36,9 @@ if type(C_Spell.CanSpellBeCastOnUnit) ~= "function" then
         return UnitIsVisible(unit)
     end
 end
+
+if type(GetUnitEmpowerStageDuration) ~= "function" then
+    GetUnitEmpowerStageDuration = function()
+        return 0
+    end
+end
