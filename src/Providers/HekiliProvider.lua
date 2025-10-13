@@ -1,37 +1,15 @@
 local _, WoWHACv5 = ...
 
 WoWHACv5.providers = WoWHACv5.providers or {}
-WoWHACv5.providers["Hekili"] = function ()
+WoWHACv5.providers["Hekili"] = function()
     WoWHACv5:Log("Supplier found: Hekili.")
-    WoWHACv5.ToggleHekiliFrame:Init()
+    local provider = Hekili_Primary_B1;
+    local Keybind = provider.Keybinding
 
-    WoWHACv5:RegisterMessage("WOWHACV4_WA_PRESENTS", function(_, _, isLoaded)
-        if isLoaded then
-            WoWHACv5:SecureHook(WeakAuras, "ScanEvents", function(event, display, spellId, _, _, arg5)
-                if event == "HEKILI_RECOMMENDATION_UPDATE" and arg5 then
-                    local currentRec = arg5[1]
-                    if currentRec then
-                        local keybind = currentRec.keybind
-                        if keybind ~= WoWHACv5:GetCurrentHotKey() then
-                            WoWHACv5:SetCurrentId(currentRec.actionID or spellId)
-                            WoWHACv5:SetCurrentHotKey(keybind)
-                        end
-                        if currentRec.indicator == "cycle" then
-                            WoWHACv5:SetCurrentHotKey("s-n")
-                        end
-                    end
-                    --local nextRec = arg5[2]
-                    --if nextRec then
-                    --    local keybind = nextRec.keybind
-                    --    if keybind ~= WoWHACv5:GetNextHotKey() then
-                    --        WoWHACv5:SetNextId(nextRec.actionID)
-                    --        WoWHACv5:SetNextHotKey(keybind)
-                    --    end
-                    --end
-                end
-            end)
-        else
-            WoWHACv5:Log("To use the Hekili as rotation, you need to install WeakAuras.")
+    WoWHACv5:SecureHook(Keybind, "SetText", function(_, txt)
+        if provider.Ability ~= nil then
+            WoWHACv5:SetCurrentId(provider.Ability.id)
         end
+        WoWHACv5:SetCurrentHotKey(txt)
     end)
 end
